@@ -20,8 +20,7 @@ end
 function sysCall_actuation()
    updateUnitWheelVelocities()
    updateUnitPosition()
-   print(unit_position)
-   -- put your actuation code here
+   updateUnitVelocity()
 end
 
 function sysCall_sensing()
@@ -93,9 +92,35 @@ function updateUnitPosition()
    unit_position[2] = (unit_wheel_lpos[2] + unit_wheel_rpos[2]) / 2 -- y
 end
 
+function updateUnitVelocity()
+   unit_vel = _getUnitVelocity()
+   unit_ang_vel = _getUnitAngularVelocity()
+end
+
 -- helper/internal functions
 function _mag(v)
    return math.sqrt((v[1] * v[1]) + (v[2] * v[2]))
+end
+
+function _getUnitVelocity()
+   theta = sim.getObjectOrientation(
+      sim.getObjectHandle('unit'),
+      -1
+   )[3]
+
+   vel_magnitude = math.max(
+      0.01,
+      (wheel_radius / 2) * (left_wheel_av + right_wheel_av)
+   )
+
+   return {
+      math.cos(theta) * vel_magnitude,
+      math.sin(theta) * vel_magnitude
+   }
+end
+
+function _getUnitAngularVelocity()
+
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
