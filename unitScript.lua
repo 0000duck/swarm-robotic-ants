@@ -11,15 +11,20 @@ function sysCall_init()
    right_wheel_av = 0                    -- right wheel angular velocity (radians/s)
 
    unit_position = {0, 0}                -- unit location (x, y) (m)
-   unit_accel    = {0.1, 0}                -- unit acceleration (a_x, a_y) (m/s^2)
+   unit_accel    = {0, 0}                -- unit acceleration (a_x, a_y) (m/s^2)
    unit_vel      = {0, 0}                -- unit velocity (v_x, v_y) (m/s)
    unit_ang_vel  = {0, 0}                -- unit angular velocity (v_x, v_y) (rad/s)
    
 end
 
 function sysCall_actuation()
+   -- update units' wheel velocities
    updateUnitWheelVelocities()
+
+   -- update units' position
    updateUnitPosition()
+
+   -- update units' velocities
    updateUnitVelocity()
 end
 
@@ -45,7 +50,6 @@ function updateUnitWheelVelocities()
    -- angle wrapping
    alpha = phi - theta -- angle difference
    alpha = math.atan2(math.sin(alpha), math.cos(alpha))
-   -- alpha = ((math.pi + alpha) % 2 * math.pi) - math.pi
    
    -- determine the sign
    sign = 1
@@ -62,10 +66,10 @@ function updateUnitWheelVelocities()
    }
 
    new_ang_vel_mag = _mag(new_ang_vel)
-   t_velocity_mag      = _mag(t_velocity)
+   t_velocity_mag  = _mag(t_velocity)
 
-   left_wheel_av = (1 / wheel_radius) * (t_velocity_mag + (axle_length / 2) * new_ang_vel_mag)
-   right_wheel_av = (1 / wheel_radius) * (t_velocity_mag - (axle_length / 2) * new_ang_vel_mag)
+   left_wheel_av = (1 / wheel_radius) * (t_velocity_mag + (axle_length / 2) * new_ang_vel_mag * sign)
+   right_wheel_av = (1 / wheel_radius) * (t_velocity_mag - (axle_length / 2) * new_ang_vel_mag * sign)
 
    -- set the motor velocities
    sim.setJointTargetVelocity(
@@ -81,11 +85,11 @@ end
 function updateUnitPosition()
    unit_wheel_lpos = sim.getObjectPosition(
       sim.getObjectHandle('Pioneer_p3dx_leftWheel'),
-      unitScript
+      -1
    )
    unit_wheel_rpos = sim.getObjectPosition(
       sim.getObjectHandle('Pioneer_p3dx_rightWheel'),
-      unitScript
+      -1
    )
 
    unit_position[1] = (unit_wheel_lpos[1] + unit_wheel_rpos[1]) / 2 -- x
@@ -93,7 +97,10 @@ function updateUnitPosition()
 end
 
 function updateUnitVelocity()
+   -- update the units' velocity
    unit_vel = _getUnitVelocity()
+
+   -- update the units' angular velocity
    unit_ang_vel = _getUnitAngularVelocity()
 end
 
@@ -103,11 +110,13 @@ function _mag(v)
 end
 
 function _getUnitVelocity()
+   -- get the theta (yaw) of the unit
    theta = sim.getObjectOrientation(
       sim.getObjectHandle('unit'),
       -1
    )[3]
 
+   -- get the magnitude
    vel_magnitude = math.max(
       0.01,
       (wheel_radius / 2) * (left_wheel_av + right_wheel_av)
