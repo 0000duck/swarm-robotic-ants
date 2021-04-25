@@ -18,7 +18,7 @@ class CoppeliaSimulator():
         return self._pyrep
         
 if __name__ == '__main__':
-    cpSim = CoppeliaSimulator("main-scene.ttt")
+    cpSim = CoppeliaSimulator('main-scene.ttt')
     cpSim.start()
 
     cpSim.shutdown()
