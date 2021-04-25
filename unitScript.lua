@@ -11,7 +11,7 @@ function sysCall_init()
    right_wheel_av = 0                    -- right wheel angular velocity (radians/s)
 
    unit_position = {0, 0}                -- unit location (x, y) (m)
-   unit_accel    = {0, 0}                -- unit acceleration (a_x, a_y) (m/s^2)
+   unit_accel    = {0.1, 0}                -- unit acceleration (a_x, a_y) (m/s^2)
    unit_vel      = {0, 0}                -- unit velocity (v_x, v_y) (m/s)
    unit_ang_vel  = {0, 0}                -- unit angular velocity (v_x, v_y) (rad/s)
    
@@ -19,6 +19,7 @@ end
 
 function sysCall_actuation()
    updateUnitWheelVelocities()
+   updateUnitLocation()
    -- put your actuation code here
 end
 
@@ -39,13 +40,17 @@ function updateUnitWheelVelocities()
    }
 
    phi = math.atan2(t_velocity[2], t_velocity[1]) -- desired angle
+   print('PHI: ' .. phi)
    theta = math.atan2(unit_vel[2], unit_vel[1])   -- current angle
-
+   print('THETA: ' .. theta)
+   
    -- angle wrapping
    alpha = phi - theta -- angle difference
    alpha = math.atan2(math.sin(alpha), math.cos(alpha))
-   alpha = ((math.pi + alpha) % 2 * math.pi) - math.pi
-
+   print('BEFORE: '.. alpha)
+   -- alpha = ((math.pi + alpha) % 2 * math.pi) - math.pi
+   print('AFTER: ' .. alpha)
+   
    -- determine the sign
    sign = 1
    if alpha > 0 then
@@ -75,6 +80,20 @@ function updateUnitWheelVelocities()
       sim.getObjectHandle('Pioneer_p3dx_rightMotor'),
       right_wheel_av
    )
+end
+
+function updateUnitLocation()
+   unit_wheel_lpos = sim.getObjectPosition(
+      sim.getObjectHandle('Pioneer_p3dx_leftWheel'),
+      unitScript
+   )
+   unit_wheel_rpos = sim.getObjectPosition(
+      sim.getObjectHandle('Pioneer_p3dx_rightWheel'),
+      unitScript
+   )
+
+   unit_position[1] = (unit_wheel_lpos[1] + unit_wheel_rpos[1]) / 2 -- x
+   unit_position[2] = (unit_wheel_lpos[2] + unit_wheel_rpos[2]) / 2 -- y
 end
 
 -- helper/internal functions
