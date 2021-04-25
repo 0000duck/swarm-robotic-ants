@@ -140,4 +140,19 @@ function _getUnitAngularVelocity()
    }
 end
 
+-- set of PyRep functions
+function getLocation(ints, floats, strings, bytes)
+   return {}, unit_position, {}, ''
+end
+
+function getVelocity(ints, floats, strings, bytes)
+   return {}, unit_vel, {}, ''
+end
+
+function applyForce(ints, floats, strings, bytes)
+   unit_accel = {
+      floats[1],
+      floats[2]
+   }
+
 -- See the user manual or the available code snippets for additional callback functions and details
