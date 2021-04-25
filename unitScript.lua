@@ -1,5 +1,5 @@
 function sysCall_init()
-    -- do some initialization here
+   print('unitScript initializing...')
 end
 
 function sysCall_actuation()
