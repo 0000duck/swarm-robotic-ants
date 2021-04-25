@@ -19,7 +19,8 @@ end
 
 function sysCall_actuation()
    updateUnitWheelVelocities()
-   updateUnitLocation()
+   updateUnitPosition()
+   print(unit_position)
    -- put your actuation code here
 end
 
@@ -40,16 +41,12 @@ function updateUnitWheelVelocities()
    }
 
    phi = math.atan2(t_velocity[2], t_velocity[1]) -- desired angle
-   print('PHI: ' .. phi)
    theta = math.atan2(unit_vel[2], unit_vel[1])   -- current angle
-   print('THETA: ' .. theta)
    
    -- angle wrapping
    alpha = phi - theta -- angle difference
    alpha = math.atan2(math.sin(alpha), math.cos(alpha))
-   print('BEFORE: '.. alpha)
    -- alpha = ((math.pi + alpha) % 2 * math.pi) - math.pi
-   print('AFTER: ' .. alpha)
    
    -- determine the sign
    sign = 1
@@ -82,7 +79,7 @@ function updateUnitWheelVelocities()
    )
 end
 
-function updateUnitLocation()
+function updateUnitPosition()
    unit_wheel_lpos = sim.getObjectPosition(
       sim.getObjectHandle('Pioneer_p3dx_leftWheel'),
       unitScript
