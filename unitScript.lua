@@ -120,7 +120,15 @@ function _getUnitVelocity()
 end
 
 function _getUnitAngularVelocity()
+   _, angular_vel = sim.getObjectVelocity(
+      sim.getObjectHandle('unit'),
+      -1
+   )
 
+   return {
+      angular_vel[1],
+      angular_vel[2]
+   }
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
