@@ -1,13 +1,14 @@
 from pyrep import PyRep
 import numpy as np
+from numpy import linalg as la
 
 class Unit():
     def __init__(self, pyrep: PyRep):
         self._pyrep = pyrep
 
         # unit traits
-        self.max_speed = 1.5
-        self.max_force = 2.0
+        self.max_speed = 1.0
+        self.max_force = 5.0
 
     def getLocation(self):
         ints, floats, strings, byte = self._pyrep.script_call(
@@ -43,4 +44,13 @@ class Unit():
             bytes=''
         )
 
-        self._pyrep.step()
+    def seek(self, target) -> float:
+        position = self.getLocation()
+        desired  = np.subtract(target, position)
+        desired = (desired / la.norm(desired)) * self.max_speed
+
+        steer = np.subtract(desired, self.getVelocity())
+        steer = np.clip(steer, None, self.max_force)
+
+        self.applyForce(steer)
+        return la.norm(target - position)
