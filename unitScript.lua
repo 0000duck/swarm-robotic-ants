@@ -1,7 +1,11 @@
 function sysCall_init()
    print('unitScript initializing...')
 
+   -- scene constants
+   C_SCENE_UNIT_COUNT = 2
+   
    -- unit constants
+   C_UNIT_PREFIX = 'Pioneer_p3dx'
    C_UNIT_WHEEL_DIAM = 0.195                 -- wheel diameter (m)
    C_UNIT_WHEEL_RAD  = C_UNIT_WHEEL_DIAM / 2 -- wheel radius (m)
    C_UNIT_AXLE_LEN   = 0.331                 -- wheel separation (m)
@@ -16,17 +20,40 @@ function sysCall_init()
    --     6. unit_linVel:      {float, float} (v_x, v_y)
    --     7. unit_angVel:      {float, float} (w_x, w_y)
    -- }
+
+   units = {}
+   for i = 1, C_SCENE_UNIT_COUNT do
+      unit = sim.getObjectHandle(
+	 C_UNIT_PREFIX .. '#' .. i)
+      unit_lMotor = sim.getObjectHandle(
+	 C_UNIT_PREFIX .. '_leftMotor' .. '#' .. i)
+      unit_rMotor = sim.getObjectHandle(
+	 C_UNIT_PREFIX .. '_rightMotor' .. '#' .. i)
+
+      table.insert(
+	 units,
+	 {
+	    unit,
+	    {unit_lMotor, unit_rMotor},
+	    {0, 0},
+	    {0, 0},
+	    {0, 0},
+	    {0, 0},
+	    {0, 0}
+	 }
+      )
+   end
 end
 
 function sysCall_actuation()
    -- update units' wheel velocities
-   updateUnitWheelVelocities()
+--   updateUnitWheelVelocities()
 
    -- update units' position
-   updateUnitPosition()
+--   updateUnitPosition()
 
    -- update units' velocities
-   updateUnitVelocity()
+--   updateUnitVelocity()
 end
 
 function sysCall_sensing()
