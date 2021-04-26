@@ -3,8 +3,9 @@ import numpy as np
 from numpy import linalg as la
 
 class Unit():
-    def __init__(self, pyrep: PyRep):
+    def __init__(self, pyrep: PyRep, index: int):
         self._pyrep = pyrep
+        self._index = index
 
         # unit traits
         self.max_speed = 1.0
@@ -14,7 +15,7 @@ class Unit():
         ints, floats, strings, byte = self._pyrep.script_call(
             function_name_at_script_name='getLocation@unitScript',
             script_handle_or_type=1,
-            ints=(),
+            ints=([self._index]),
             floats=(),
             strings=(),
             bytes=''
@@ -26,7 +27,7 @@ class Unit():
         ints, floats, strings, byte = self._pyrep.script_call(
             function_name_at_script_name='getVelocity@unitScript',
             script_handle_or_type=1,
-            ints=(),
+            ints=([self._index]),
             floats=(),
             strings=(),
             bytes=''
@@ -38,7 +39,7 @@ class Unit():
         self._pyrep.script_call(
             function_name_at_script_name='applyForce@unitScript',
             script_handle_or_type=1,
-            ints=(),
+            ints=([self._index]),
             floats=([force[0], force[1]]),
             strings=(),
             bytes=''
