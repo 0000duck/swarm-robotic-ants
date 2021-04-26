@@ -2,7 +2,7 @@ function sysCall_init()
    print('unitScript initializing...')
 
    -- scene constants
-   C_SCENE_UNIT_COUNT = 10
+   C_SCENE_UNIT_COUNT = 5
    
    -- unit constants
    C_UNIT_PREFIX = 'Pioneer_p3dx'
