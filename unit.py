@@ -78,5 +78,4 @@ class Unit():
 
         steer = np.clip(sep, None, self.max_sep_force)
         if not np.isnan(steer).any():
-            print('APPLYING FORCE TO {}: {}'.format(self._index, steer))
             self.applyForce(steer)
