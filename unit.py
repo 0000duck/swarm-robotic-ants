@@ -60,7 +60,7 @@ class Unit():
         return la.norm(target - position)
 
     def separate(self, units):
-        sep = np.array([np.nan, np.nan])
+        steer = np.array([np.nan, np.nan])
         
         for unit in units:
             curr_pos = self.getLocation()
@@ -71,11 +71,11 @@ class Unit():
                 rep = np.subtract(curr_pos, unit_pos)
                 rep = (rep / la.norm(rep)) * (1 / self.max_sep_speed)
 
-                if np.isnan(sep).any():
-                    sep = rep
+                if np.isnan(steer).any():
+                    steer = rep
                 else:
-                    sep = sep + rep
+                    steer = steer + rep
 
-        steer = np.clip(sep, None, self.max_sep_force)
         if not np.isnan(steer).any():
+            steer = np.clip(steer, None, self.max_sep_force)
             self.applyForce(steer)
