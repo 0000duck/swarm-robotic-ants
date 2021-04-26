@@ -40,14 +40,14 @@ if __name__ == '__main__':
     ]
 
     for target in targets:
-        dist = 1000
-        for unit in units:
-            dist = min(dist, unit.seek(target))
+        dist = units[0].seek(target)
 
         while dist > 0.5:
             cpsim.step()
-            for unit in units:
-                dist = min(dist, unit.seek(target))
-                unit.separate(units)
+            dist = units[0].seek(target)
+            units[1].seek(units[0].getLocation())
+            
+            units[0].separate(units)
+            units[1].separate(units)
 
     cpSim.shutdown()
