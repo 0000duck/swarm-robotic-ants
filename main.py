@@ -27,7 +27,7 @@ if __name__ == '__main__':
     cpSim = CoppeliaSimulator('main-scene.ttt')
     cpSim.start()
 
-    unit = Unit(cpSim.getPyRep())
+    unit = Unit(cpSim.getPyRep(), 1)
 
     target = np.array([10.0, 5.0])
 

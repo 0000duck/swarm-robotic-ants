@@ -51,10 +51,10 @@ function sysCall_actuation()
       updateUnitWheelVelocities(i)
 
       -- update units' position
-      --   updateUnitPosition(i)
+         updateUnitPosition(i)
 
       -- update units' velocities
-      --   updateUnitVelocity(i)
+         updateUnitVelocity(i)
    end
 end
 
@@ -70,12 +70,12 @@ end
 function updateUnitWheelVelocities(i)
    -- calculate target pose
    t_velocity = {
-      unit_linVel[1] + unit_accel[1], -- v'_x = v_x + a_x
-      unit_linVel[2] + unit_accel[2]  -- v'_y = v_y + a_y
+      units[i][5][1] + units[i][7][1], -- v'_x = v_x + a_x
+      units[i][5][2] + units[i][7][2]  -- v'_y = v_y + a_y
    }
 
    phi = math.atan2(t_velocity[2], t_velocity[1]) -- desired angle
-   theta = math.atan2(unit_linVel[2], unit_linVel[1])   -- current angle
+   theta = math.atan2(units[i][5][2], units[i][5][1])   -- current angle
    
    -- angle wrapping
    alpha = phi - theta -- angle difference
@@ -91,47 +91,43 @@ function updateUnitWheelVelocities(i)
 
    -- unit angular velocity (omega)
    new_ang_vel = {
-      unit_angVel[1] + unit_accel[1],
-      unit_angVel[2] + unit_accel[2]
+      units[i][6][1] + units[i][7][1],
+      units[i][6][2] + units[i][7][2]
    }
 
    new_ang_vel_mag = _mag(new_ang_vel)
    t_velocity_mag  = _mag(t_velocity)
 
-   unit_lwheel_angVel = (1 / C_UNIT_WHEEL_RAD) * (t_velocity_mag + (C_UNIT_AXLE_LEN / 2) * new_ang_vel_mag * sign)
-   unit_rwheel_angVel = (1 / C_UNIT_WHEEL_RAD) * (t_velocity_mag - (C_UNIT_AXLE_LEN / 2) * new_ang_vel_mag * sign)
+   units[i][3][1] = (1 / C_UNIT_WHEEL_RAD) * (t_velocity_mag + (C_UNIT_AXLE_LEN / 2) * new_ang_vel_mag * sign)
+   units[i][3][2] = (1 / C_UNIT_WHEEL_RAD) * (t_velocity_mag - (C_UNIT_AXLE_LEN / 2) * new_ang_vel_mag * sign)
 
    -- set the motor velocities
    sim.setJointTargetVelocity(
-      sim.getObjectHandle('Pioneer_p3dx_leftMotor'),
-      unit_lwheel_angVel
+      units[i][2][1],
+      units[i][3][1]
    )
    sim.setJointTargetVelocity(
-      sim.getObjectHandle('Pioneer_p3dx_rightMotor'),
-      unit_rwheel_angVel
+      units[i][2][2],
+      units[i][3][2]
    )
 end
 
-function updateUnitPosition()
-   unit_wheel_lpos = sim.getObjectPosition(
-      sim.getObjectHandle('Pioneer_p3dx_leftWheel'),
+function updateUnitPosition(i)
+   pos = sim.getObjectPosition(
+      units[i][1],
       -1
    )
-   unit_wheel_rpos = sim.getObjectPosition(
-      sim.getObjectHandle('Pioneer_p3dx_rightWheel'),
-      -1
-   )
-
-   unit_pos[1] = (unit_wheel_lpos[1] + unit_wheel_rpos[1]) / 2 -- x
-   unit_pos[2] = (unit_wheel_lpos[2] + unit_wheel_rpos[2]) / 2 -- y
+   
+   units[i][4][1] = pos[1] -- x
+   units[i][4][2] = pos[2] -- y
 end
 
-function updateUnitVelocity()
+function updateUnitVelocity(i)
    -- update the units' velocity
-   unit_linVel = _getUnitVelocity()
+   units[i][5] = _getUnitVelocity(i)
 
    -- update the units' angular velocity
-   unit_angVel = _getUnitAngularVelocity()
+   units[i][6] = _getUnitAngularVelocity(i)
 end
 
 -- helper/internal functions
@@ -139,17 +135,17 @@ function _mag(v)
    return math.sqrt((v[1] * v[1]) + (v[2] * v[2]))
 end
 
-function _getUnitVelocity()
+function _getUnitVelocity(i)
    -- get the theta (yaw) of the unit
    theta = sim.getObjectOrientation(
-      sim.getObjectHandle('unit'),
+      units[i][1],
       -1
    )[3]
 
    -- get the magnitude
    vel_magnitude = math.max(
       0.01,
-      (C_UNIT_WHEEL_RAD / 2) * (unit_lwheel_angVel + unit_rwheel_angVel)
+      (C_UNIT_WHEEL_RAD / 2) * (units[i][3][1] + units[i][3][2])
    )
 
    return {
@@ -158,9 +154,9 @@ function _getUnitVelocity()
    }
 end
 
-function _getUnitAngularVelocity()
+function _getUnitAngularVelocity(i)
    _, angular_vel = sim.getObjectVelocity(
-      sim.getObjectHandle('unit'),
+      units[i][1],
       -1
    )
 
@@ -172,15 +168,18 @@ end
 
 -- set of PyRep functions
 function getLocation(ints, floats, strings, bytes)
-   return {}, unit_pos, {}, ''
+   i = ints[1]
+   return {}, units[i][4], {}, ''
 end
 
 function getVelocity(ints, floats, strings, bytes)
-   return {}, unit_linVel, {}, ''
+   i = ints[1]
+   return {}, units[i][5], {}, ''
 end
 
 function applyForce(ints, floats, strings, bytes)
-   unit_accel = {
+   i = ints[1]
+   units[i][7] = {
       floats[1],
       floats[2]
    }
