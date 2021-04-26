@@ -16,9 +16,9 @@ function sysCall_init()
    --     2. unit_motorObjs:   {int, int}     (leftMotor, rightMotor)
    --     3. unit_motorAngVel: {float, float} (leftMotor, rightMotor)
    --     4. unit_pos:         {float, float} (x, y)
-   --     5. unit_accel:       {float, float} (a_x, a_y)
-   --     6. unit_linVel:      {float, float} (v_x, v_y)
-   --     7. unit_angVel:      {float, float} (w_x, w_y)
+   --     5. unit_linVel:      {float, float} (v_x, v_y)
+   --     6. unit_angVel:      {float, float} (w_x, w_y)
+   --     7. unit_accel:       {float, float} (a_x, a_y)
    -- }
 
    units = {}
@@ -46,14 +46,16 @@ function sysCall_init()
 end
 
 function sysCall_actuation()
-   -- update units' wheel velocities
---   updateUnitWheelVelocities()
+   for i = 1, C_SCENE_UNIT_COUNT do
+      -- update units' wheel velocities
+      updateUnitWheelVelocities(i)
 
-   -- update units' position
---   updateUnitPosition()
+      -- update units' position
+      --   updateUnitPosition(i)
 
-   -- update units' velocities
---   updateUnitVelocity()
+      -- update units' velocities
+      --   updateUnitVelocity(i)
+   end
 end
 
 function sysCall_sensing()
@@ -65,7 +67,7 @@ function sysCall_cleanup()
 end
 
 -- update functions
-function updateUnitWheelVelocities()
+function updateUnitWheelVelocities(i)
    -- calculate target pose
    t_velocity = {
       unit_linVel[1] + unit_accel[1], -- v'_x = v_x + a_x
