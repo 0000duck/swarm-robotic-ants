@@ -24,13 +24,13 @@ class CoppeliaSimulator():
         self._pyrep.step()
         
 if __name__ == '__main__':
-    cpSim = CoppeliaSimulator('main-scene.ttt')
-    cpSim.start()
+    cpsim = CoppeliaSimulator('main-scene.ttt')
+    cpsim.start()
 
-    unit = Unit(cpSim.getPyRep(), 1)
-
-    target = np.array([10.0, 5.0])
-
+    units = []
+    for i in range(1, 11):
+        units.append(Unit(cpsim.getPyRep(), i))
+    
     targets = [
         np.array([10.0, 5.0]),
         np.array([10.0, -5.0]),
@@ -40,10 +40,13 @@ if __name__ == '__main__':
     ]
 
     for target in targets:
-        dist = unit.seek(target)
+        dist = 1000
+        for unit in units:
+            dist = min(dist, unit.seek(target))
 
         while dist > 0.5:
-            cpSim.step()
-            dist = unit.seek(target)
+            cpsim.step()
+            for unit in units:
+                dist = min(dist, unit.seek(target))
 
     cpSim.shutdown()
