@@ -14,7 +14,6 @@ function sysCall_init()
    unit_accel    = {0, 0}                -- unit acceleration (a_x, a_y) (m/s^2)
    unit_vel      = {0, 0}                -- unit velocity (v_x, v_y) (m/s)
    unit_ang_vel  = {0, 0}                -- unit angular velocity (v_x, v_y) (rad/s)
-   
 end
 
 function sysCall_actuation()
@@ -53,7 +52,7 @@ function updateUnitWheelVelocities()
    
    -- determine the sign
    sign = 1
-   if alpha > 0 then
+   if alpha < 0 then
       sign = 1
    else
       sign = -1
@@ -154,5 +153,6 @@ function applyForce(ints, floats, strings, bytes)
       floats[1],
       floats[2]
    }
+end
 
 -- See the user manual or the available code snippets for additional callback functions and details
