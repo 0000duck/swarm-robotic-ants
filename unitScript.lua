@@ -2,9 +2,9 @@ function sysCall_init()
    print('unitScript initializing...')
 
    -- unit constants
-   wheel_diameter = 0.195                -- wheel diameter (m)
-   wheel_radius   = wheel_diameter / 2   -- wheel radius (m)
-   axle_length    = 0.331                -- wheel separation (m)
+   C_UNIT_WHEEL_DIAM = 0.195                 -- wheel diameter (m)
+   C_UNIT_WHEEL_RAD  = C_UNIT_WHEEL_DIAM / 2 -- wheel radius (m)
+   C_UNIT_AXLE_LEN   = 0.331                 -- wheel separation (m)
 
    -- initial unit properties
    left_wheel_av  = 0                    -- left wheel angular velocity (radians/s)
@@ -67,8 +67,8 @@ function updateUnitWheelVelocities()
    new_ang_vel_mag = _mag(new_ang_vel)
    t_velocity_mag  = _mag(t_velocity)
 
-   left_wheel_av = (1 / wheel_radius) * (t_velocity_mag + (axle_length / 2) * new_ang_vel_mag * sign)
-   right_wheel_av = (1 / wheel_radius) * (t_velocity_mag - (axle_length / 2) * new_ang_vel_mag * sign)
+   left_wheel_av = (1 / C_UNIT_WHEEL_RAD) * (t_velocity_mag + (C_UNIT_AXLE_LEN / 2) * new_ang_vel_mag * sign)
+   right_wheel_av = (1 / C_UNIT_WHEEL_RAD) * (t_velocity_mag - (C_UNIT_AXLE_LEN / 2) * new_ang_vel_mag * sign)
 
    -- set the motor velocities
    sim.setJointTargetVelocity(
@@ -118,7 +118,7 @@ function _getUnitVelocity()
    -- get the magnitude
    vel_magnitude = math.max(
       0.01,
-      (wheel_radius / 2) * (left_wheel_av + right_wheel_av)
+      (C_UNIT_WHEEL_RAD / 2) * (left_wheel_av + right_wheel_av)
    )
 
    return {
