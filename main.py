@@ -22,7 +22,7 @@ class CoppeliaSimulator():
 
     def step(self) -> None:
         self._pyrep.step()
-        
+
 if __name__ == '__main__':
     cpsim = CoppeliaSimulator('main-scene.ttt')
     cpsim.start()
@@ -48,5 +48,6 @@ if __name__ == '__main__':
             cpsim.step()
             for unit in units:
                 dist = min(dist, unit.seek(target))
+                unit.separate(units)
 
     cpSim.shutdown()
