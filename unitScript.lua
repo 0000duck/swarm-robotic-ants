@@ -6,14 +6,16 @@ function sysCall_init()
    C_UNIT_WHEEL_RAD  = C_UNIT_WHEEL_DIAM / 2 -- wheel radius (m)
    C_UNIT_AXLE_LEN   = 0.331                 -- wheel separation (m)
 
-   -- initial unit properties
-   unit_lwheel_angVel  = 0                    -- left wheel angular velocity (radians/s)
-   unit_rwheel_angVel  = 0                    -- right wheel angular velocity (radians/s)
-
-   unit_pos    = {0, 0}                -- unit location (x, y) (m)
-   unit_accel  = {0, 0}                -- unit acceleration (a_x, a_y) (m/s^2)
-   unit_linVel = {0, 0}                -- unit velocity (v_x, v_y) (m/s)
-   unit_angVel = {0, 0}                -- unit angular velocity (v_x, v_y) (rad/s)
+   -- create table of units with properties
+   -- {
+   --     1. unit_obj:          int
+   --     2. unit_motorObjs:   {int, int}     (leftMotor, rightMotor)
+   --     3. unit_motorAngVel: {float, float} (leftMotor, rightMotor)
+   --     4. unit_pos:         {float, float} (x, y)
+   --     5. unit_accel:       {float, float} (a_x, a_y)
+   --     6. unit_linVel:      {float, float} (v_x, v_y)
+   --     7. unit_angVel:      {float, float} (w_x, w_y)
+   -- }
 end
 
 function sysCall_actuation()
