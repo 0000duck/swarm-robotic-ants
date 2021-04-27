@@ -6,19 +6,22 @@ function sysCall_init()
    
    -- unit constants
    C_UNIT_PREFIX = 'Pioneer_p3dx'
+   C_UNIT_GRIP_PREFIX = 'ROBOTIQ_85'
    C_UNIT_WHEEL_DIAM = 0.195                 -- wheel diameter (m)
    C_UNIT_WHEEL_RAD  = C_UNIT_WHEEL_DIAM / 2 -- wheel radius (m)
    C_UNIT_AXLE_LEN   = 0.331                 -- wheel separation (m)
 
    -- create table of units with properties
    -- {
-   --     1. unit_obj:          int
-   --     2. unit_motorObjs:   {int, int}     (leftMotor, rightMotor)
-   --     3. unit_motorAngVel: {float, float} (leftMotor, rightMotor)
-   --     4. unit_pos:         {float, float} (x, y)
-   --     5. unit_linVel:      {float, float} (v_x, v_y)
-   --     6. unit_angVel:      {float, float} (w_x, w_y)
-   --     7. unit_accel:       {float, float} (a_x, a_y)
+   --   1. unit_obj:          int
+   --   2. unit_motorObjs:   {int, int}           (leftMotor, rightMotor)
+   --   3. unit_motorAngVel: {float, float}       (leftMotor, rightMotor)
+   --   4. unit_pos:         {float, float}       (x, y)
+   --   5. unit_linVel:      {float, float}       (v_x, v_y)
+   --   6. unit_angVel:      {float, float}       (w_x, w_y)
+   --   7. unit_accel:       {float, float}       (a_x, a_y)
+   --   8. unit_grip:        {int, int}           (position, itemHandle)
+   --   9. unit_grip_objs:   {int, int, int, int} (joint1, joint2, sensor, connector)
    -- }
 
    units = {}
@@ -30,19 +33,37 @@ function sysCall_init()
       unit_rMotor = sim.getObjectHandle(
 	 C_UNIT_PREFIX .. '_rightMotor' .. '#' .. i)
 
+      unit_gJoint1 = sim.getObjectHandle(
+	 C_UNIT_GRIP_PREFIX .. '_active1' .. '#' .. i)
+      unit_gJoint2 = sim.getObjectHandle(
+	 C_UNIT_GRIP_PREFIX .. '_active2' .. '#' .. i)
+      unit_gSensor = sim.getObjectHandle(
+	 C_UNIT_GRIP_PREFIX .. '_attachProxSensor' .. '#' .. i)
+      unit_gConnection = sim.getObjectHandle(
+	 C_UNIT_GRIP_PREFIX .. '_attachPoint' .. '#' .. i)
+      
       table.insert(
 	 units,
 	 {
-	    unit,
-	    {unit_lMotor, unit_rMotor},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0},
-	    {0, 0}
+	    unit,                       -- unit_obj
+	    {unit_lMotor, unit_rMotor}, -- unit_motorObjs
+	    {0, 0},                     -- unit_motorAngVel
+	    {0, 0},                     -- unit_pos
+	    {0, 0},                     -- unit_linVel
+	    {0, 0},                     -- unit_angVel
+	    {0, 0},                     -- unit_accel
+	    {0, nil},                   -- unit_grip
+	    {                           -- unit_grip_objs
+	       unit_gJoint1,                -- unit_joint1
+	       unit_gJoint2,                -- unit_joint2
+	       unit_gSensor,                -- unit_proxSensor
+	       unit_gConnection             -- unit_attachPoint
+	    }
 	 }
       )
    end
+
+   print(units)
 end
 
 function sysCall_actuation()
