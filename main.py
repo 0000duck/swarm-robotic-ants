@@ -92,9 +92,13 @@ if __name__ == '__main__':
 
                     if waypoint[0] == -1:
                         # start target
+                        unit.setSubMode('gather')
+                        print('#{}: setting mode to GATHER'.format(unit._index))
                         print('#{}: actuating gripper...'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
+                        unit.setSubMode('return')
+                        print('#{}: setting mode to RETURN'.format(unit._index))
                         print('#{}: searching for supplies...'.format(unit._index))
                         print('#{}: actuating gripper...'.format(unit._index))
 
