@@ -9,21 +9,21 @@ class Unit():
 
         self._targets = []
 
-        # unit traits
-        self.max_speed = 1.0
-        self.max_force = 5.0
+        # unit movement properties
+        self._max_speed = 1.0
+        self._max_force = 5.0
 
-        self.min_sep_dist = 2.0
-        self.max_sep_speed = 10.0
-        self.max_sep_force = 5.0
+        # unit separation properties
+        self._min_sep_dist = 1.5
+        self._max_sep_speed = 5.0
+        self._max_sep_force = 5.0
 
-        self.min_follow_dist = 2.0
+        # unit arrival properties
+        self._arrival_rad = 1.5
 
-        self.arrival_radius = 1.5
-
-    def getLocation(self):
+    def getPosition(self):
         ints, floats, strings, byte = self._pyrep.script_call(
-            function_name_at_script_name='getLocation@unitScript',
+            function_name_at_script_name='getPosition@unitScript',
             script_handle_or_type=1,
             ints=([self._index]),
             floats=(),
@@ -57,30 +57,30 @@ class Unit():
 
     def seek(self, behavior=None):
         if behavior == 'arrival':
-            radius = self.arrival_radius
+            radius = self._arrival_rad
             dist = self.distTo(self.getCurrTarget())
 
-            rated_speed = self.max_speed
+            rated_speed = self._max_speed
             
             if dist < radius:
-                rated_speed = self.max_speed * (dist / radius)
-                rated_speed = min(rated_speed, self.max_speed)
+                rated_speed = self._max_speed * (dist / radius)
+                rated_speed = min(rated_speed, self._max_speed)
 
-            position = self.getLocation()
+            position = self.getPosition()
             desired  = np.subtract(self._targets[0], position)
             desired = (desired / la.norm(desired)) * rated_speed
 
             steer = np.subtract(desired, self.getVelocity())
-            steer = np.clip(steer, None, self.max_force)
+            steer = np.clip(steer, None, self._max_force)
 
             self.applyForce(steer)
         else:
-            position = self.getLocation()
+            position = self.getPosition()
             desired  = np.subtract(self._targets[0], position)
-            desired = (desired / la.norm(desired)) * self.max_speed
+            desired = (desired / la.norm(desired)) * self._max_speed
 
             steer = np.subtract(desired, self.getVelocity())
-            steer = np.clip(steer, None, self.max_force)
+            steer = np.clip(steer, None, self._max_force)
 
             self.applyForce(steer)
 
@@ -88,13 +88,13 @@ class Unit():
         steer = np.array([np.nan, np.nan])
         
         for unit in units:
-            curr_pos = self.getLocation()
-            unit_pos = unit.getLocation()
+            curr_pos = self.getPosition()
+            unit_pos = unit.getPosition()
 
             dist = la.norm(curr_pos - unit_pos)
-            if dist < self.min_sep_dist:
+            if dist < self._min_sep_dist:
                 rep = np.subtract(curr_pos, unit_pos)
-                rep = (rep / la.norm(rep)) * (1 / self.max_sep_speed)
+                rep = (rep / la.norm(rep)) * (1 / self._max_sep_speed)
 
                 if np.isnan(steer).any():
                     steer = rep
@@ -102,22 +102,20 @@ class Unit():
                     steer = steer + rep
 
         if not np.isnan(steer).any():
-            steer = np.clip(steer, None, self.max_sep_force)
+            steer = np.clip(steer, None, self._max_sep_force)
             self.applyForce(steer)
 
     def addTarget(self, target) -> None:
-        print('#{}: ADDED TARGET: {}'.format(self._index, target))
         self._targets.append(target)
             
     def nextTarget(self) -> None:
         self._targets.pop(0)
-        print('#{}: NEXT TARGET: {}'.format(self._index, self._targets[0]))
 
     def getCurrTarget(self):
         return self._targets[0]
     
     # helper function(s)
     def distTo(self, target) -> float:
-        return la.norm(target - self.getLocation())
+        return la.norm(target - self.getPosition())
 
     
