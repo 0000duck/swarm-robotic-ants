@@ -31,22 +31,26 @@ if __name__ == '__main__':
     for i in range(1, 6):
         units.append(Unit(cpsim.getPyRep(), i))
 
+    units[0].setMode('work')
+    units[0].setSubMode('gather')
+
+    units[1].setMode('work')
+    units[1].setSubMode('gather')
+
     targets0 = [
-        np.array([-5, 5]),
-        np.array([5, -5]),
-        np.array([-5, 5]),
-        np.array([5, -5]),
-        np.array([-5, 5]),
-        np.array([5, -5])
+        [-1, [-5, 5]],
+        [1, [5, 5]],
+        [-2, [5, -5]],
+        [1, [5, 5]]
     ]
     
     targets1 = [
-        np.array([5, -5]),
-        np.array([-5, 5]),
-        np.array([5, -5]),
-        np.array([-5, 5]),
-        np.array([5, -5]),
-        np.array([-5, 5])
+        [-2, [5, -5]],
+        [-1, [-5, 5]],
+        [-2, [5, -5]],
+        [-1, [-5, 5]],
+        [-2, [5, -5]],
+        [-1, [-5, 5]]
     ]
 
     for t in targets0:
@@ -60,13 +64,66 @@ if __name__ == '__main__':
 
     while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets:
         for unit in units:
-            unit.seek('arrival')
-            unit.separate(units)
-            
-            dist = unit.distTo(unit.getCurrTarget())
-            if dist < 0.5:
-                unit.nextTarget()
-            
+            mode = unit.getMode()
+
+            if mode == 'idle':
+                continue
+            elif mode == 'seek':
+                unit.seek()
+                unit.separate(units)
+
+                dist = unit.distTo(unit.getCurrTarget())
+                if dist < 0.5:
+                    unit.nextTarget()
+            elif mode == 'work':
+                submode = unit.getSubMode()
+
+                if submode == 'gather':
+                    unit.seek()
+                    unit.separate(units)
+                elif submode == 'return':
+                    unit.seek()
+                    unit.separate(units)
+
+                dist = unit.distTo(unit.getCurrTarget())
+                if dist < 0.5:
+                    waypoint = unit.nextTarget()
+                    unit.addTarget(waypoint) # move waypoint to back
+
+                    if waypoint[0] == -1:
+                        # start target
+                        unit.setSubMode('gather')
+                        print('#{}: setting mode to GATHER'.format(unit._index))
+                        print('#{}: actuating gripper...'.format(unit._index))
+                    elif waypoint[0] == -2:
+                        # end target
+                        unit.setSubMode('return')
+                        print('#{}: setting mode to RETURN'.format(unit._index))
+                        print('#{}: searching for supplies...'.format(unit._index))
+                        print('#{}: actuating gripper...'.format(unit._index))
+            elif mode == 'scout':
+                # TODO: implement wander/scouting
+                continue
+
+        # increment simulator
         cpsim.step()
 
+    # end of simulation
     cpsim.shutdown()
+
+'''
+UNIT MODES:
+-----
+1. Seek (seek): When a unit is in `seek` mode, the unit will continuously seek
+out the set of targets in its unit._targets list. When the last target is reached,
+its mode is changed to `idle`
+---
+2. Idle (idle): When a unit is in `idle` mode, the unit will continuously to remain
+unmoved from where it is.
+---
+3. Work (work): When a unit is in `work` mode, the unit will have a path
+(set of waypoints) to follow from the home base to the final destination that it
+will continually seek. When the unit is at the final destination target, it will
+search for the closest supply, pick it up, then return home, drop it off,
+and return back to its path.
+'''
