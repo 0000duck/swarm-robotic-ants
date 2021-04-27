@@ -22,31 +22,51 @@ class CoppeliaSimulator():
 
     def step(self) -> None:
         self._pyrep.step()
-        
+
 if __name__ == '__main__':
     cpsim = CoppeliaSimulator('main-scene.ttt')
     cpsim.start()
 
     units = []
-    for i in range(1, 11):
+    for i in range(1, 6):
         units.append(Unit(cpsim.getPyRep(), i))
+
+    targets0 = [
+        np.array([-10, 10]),
+        np.array([10, -10]),
+        np.array([-10, 10]),
+        np.array([10, -10]),
+        np.array([-10, 10]),
+        np.array([10, -10])
+    ]
     
-    targets = [
-        np.array([10.0, 5.0]),
-        np.array([10.0, -5.0]),
-        np.array([-10.0, 10.0]),
-        np.array([-10.0, -10.0]),
-        np.array([0, 0])
+    targets1 = [
+        np.array([10, -10]),
+        np.array([-10, 10]),
+        np.array([10, -10]),
+        np.array([-10, 10]),
+        np.array([10, -10]),
+        np.array([-10, 10])
     ]
 
-    for target in targets:
-        dist = 1000
+    for t in targets0:
+        units[0].addTarget(t)
+        units[1].addTarget(t)
+
+    for t in targets1:
+        units[2].addTarget(t)
+        units[3].addTarget(t)
+        units[4].addTarget(t)
+
+    while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets:
         for unit in units:
-            dist = min(dist, unit.seek(target))
+            unit.seek('arrival')
+            unit.separate(units)
+            
+            dist = unit.distTo(unit.getCurrTarget())
+            if dist < 0.5:
+                unit.nextTarget()
+            
+        cpsim.step()
 
-        while dist > 0.5:
-            cpsim.step()
-            for unit in units:
-                dist = min(dist, unit.seek(target))
-
-    cpSim.shutdown()
+    cpsim.shutdown()
