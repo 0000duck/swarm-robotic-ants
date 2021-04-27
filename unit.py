@@ -8,7 +8,8 @@ class Unit():
         self._index = index
 
         # unit properties
-        self._instrs = ['idle']
+        self._mode = 'idle'
+        self._instructions = []
         self._targets = []
 
         # unit movement properties
