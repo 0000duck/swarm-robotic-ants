@@ -63,7 +63,7 @@ class Unit():
         self._pyrep.script_call(
             function_name_at_script_name='actuateGripper@unitScript',
             script_handle_or_type=1,
-            ints-([self._index]),
+            ints=([self._index]),
             floats=(),
             strings=(),
             bytes=''
