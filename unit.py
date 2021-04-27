@@ -7,6 +7,9 @@ class Unit():
         self._pyrep = pyrep
         self._index = index
 
+        # unit properties
+        self._mode = 'seek'
+        self._submode = 'gather'
         self._targets = []
 
         # unit movement properties
@@ -16,11 +19,12 @@ class Unit():
         # unit separation properties
         self._min_sep_dist = 1.5
         self._max_sep_speed = 5.0
-        self._max_sep_force = 5.0
+        self._max_sep_force = 10.0
 
         # unit arrival properties
         self._arrival_rad = 1.5
 
+    # functions associated with PyRep
     def getPosition(self):
         ints, floats, strings, byte = self._pyrep.script_call(
             function_name_at_script_name='getPosition@unitScript',
@@ -55,6 +59,15 @@ class Unit():
             bytes=''
         )
 
+    # unit functions
+    def idle(self):
+        steer = self.getVelocity()
+        steer = steer * -1
+
+        if la.norm(steer) > 0:
+            steer = np.clip(steer, None, self._max_force)
+            self.applyForce(steer)
+
     def seek(self, behavior=None):
         if behavior == 'arrival':
             radius = self._arrival_rad
@@ -67,7 +80,7 @@ class Unit():
                 rated_speed = min(rated_speed, self._max_speed)
 
             position = self.getPosition()
-            desired  = np.subtract(self._targets[0], position)
+            desired  = np.subtract((self._targets[0])[1], position)
             desired = (desired / la.norm(desired)) * rated_speed
 
             steer = np.subtract(desired, self.getVelocity())
@@ -76,7 +89,7 @@ class Unit():
             self.applyForce(steer)
         else:
             position = self.getPosition()
-            desired  = np.subtract(self._targets[0], position)
+            desired  = np.subtract((self._targets[0])[1], position)
             desired = (desired / la.norm(desired)) * self._max_speed
 
             steer = np.subtract(desired, self.getVelocity())
@@ -109,10 +122,27 @@ class Unit():
         self._targets.append(target)
             
     def nextTarget(self) -> None:
-        self._targets.pop(0)
+        return self._targets.pop(0)
 
     def getCurrTarget(self):
-        return self._targets[0]
+        return (self._targets[0])[1]
+
+    # mode controller
+    def setMode(self, mode: str) -> None:
+        self._mode = mode
+
+    def getMode(self) -> str:
+        return self._mode
+
+    def setSubMode(self, submode: str) -> None:
+        self._submode = submode
+    
+    def getSubMode(self) -> str:
+        return self._submode
+
+    def nextMode(self) -> None:
+        self._instructions.pop(0)
+        self._mode = self._instructions[0]
     
     # helper function(s)
     def distTo(self, target) -> float:
