@@ -9,7 +9,7 @@ class Unit():
 
         # unit properties
         self._mode = 'idle'
-        self._instructions = []
+        self._submode = 'NaN'
         self._targets = []
 
         # unit movement properties
@@ -122,6 +122,10 @@ class Unit():
     # mode controller
     def getMode(self) -> str:
         return self._mode
+
+    def nextMode(self) -> None:
+        self._instructions.pop(0)
+        self._mode = self._instructions[0]
     
     # helper function(s)
     def distTo(self, target) -> float:
