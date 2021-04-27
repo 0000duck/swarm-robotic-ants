@@ -240,13 +240,10 @@ end
 
 function actuateGripper(ints, floats, strings, bytes)
    i = ints[1]
-   gripper_pos = units[i][8][1]
+   gripper_pose = ints[2]
 
-   if(gripper_pos == 1) then
-      units[i][8][1] = 0
-   else
-      units[i][8][1] = 1
-   end
+   -- set gripper pose
+   units[i][8][1] = gripper_pose
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details

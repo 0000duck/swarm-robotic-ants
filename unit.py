@@ -59,11 +59,18 @@ class Unit():
             bytes=''
         )
 
-    def actuateGripper(self):
+    def actuateGripper(self, pose: str):
+        val = 0
+
+        if pose == 'open':
+            val = 0
+        elif pose == 'close':
+            val = 1
+
         self._pyrep.script_call(
             function_name_at_script_name='actuateGripper@unitScript',
             script_handle_or_type=1,
-            ints=([self._index]),
+            ints=([self._index, val]),
             floats=(),
             strings=(),
             bytes=''
