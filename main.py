@@ -31,13 +31,17 @@ if __name__ == '__main__':
     for i in range(1, 6):
         units.append(Unit(cpsim.getPyRep(), i))
 
+    units[0].setMode('work')
+    units[0].setSubMode('gather')
+
+    units[1].setMode('work')
+    units[1].setSubMode('gather')
+
     targets0 = [
         [-1, [-5, 5]],
+        [1, [5, 5]],
         [-2, [5, -5]],
-        [-1, [-5, 5]],
-        [-2, [5, -5]],
-        [-1, [-5, 5]],
-        [-2, [5, -5]]
+        [1, [5, 5]]
     ]
     
     targets1 = [
@@ -88,10 +92,11 @@ if __name__ == '__main__':
 
                     if waypoint[0] == -1:
                         # start target
-                        continue
+                        print('#{}: actuating gripper...'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
-                        continue
+                        print('#{}: searching for supplies...'.format(unit._index))
+                        print('#{}: actuating gripper...'.format(unit._index))
 
         # increment simulator
         cpsim.step()
