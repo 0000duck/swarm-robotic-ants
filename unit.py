@@ -7,6 +7,8 @@ class Unit():
         self._pyrep = pyrep
         self._index = index
 
+        # unit properties
+        self._mode = 'idle'
         self._targets = []
 
         # unit movement properties
