@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets:
         for unit in units:
-            unit.seek()
+            unit.seek('arrival')
             unit.separate(units)
             
             dist = unit.distTo(unit.getCurrTarget())

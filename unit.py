@@ -19,6 +19,8 @@ class Unit():
 
         self.min_follow_dist = 2.0
 
+        self.arrival_radius = 1.5
+
     def getLocation(self):
         ints, floats, strings, byte = self._pyrep.script_call(
             function_name_at_script_name='getLocation@unitScript',
@@ -53,15 +55,34 @@ class Unit():
             bytes=''
         )
 
-    def seek(self):
-        position = self.getLocation()
-        desired  = np.subtract(self._targets[0], position)
-        desired = (desired / la.norm(desired)) * self.max_speed
+    def seek(self, behavior=None):
+        if behavior == 'arrival':
+            radius = self.arrival_radius
+            dist = self.distTo(self.getCurrTarget())
 
-        steer = np.subtract(desired, self.getVelocity())
-        steer = np.clip(steer, None, self.max_force)
+            rated_speed = self.max_speed
+            
+            if dist < radius:
+                rated_speed = self.max_speed * (dist / radius)
+                rated_speed = min(rated_speed, self.max_speed)
 
-        self.applyForce(steer)
+            position = self.getLocation()
+            desired  = np.subtract(self._targets[0], position)
+            desired = (desired / la.norm(desired)) * rated_speed
+
+            steer = np.subtract(desired, self.getVelocity())
+            steer = np.clip(steer, None, self.max_force)
+
+            self.applyForce(steer)
+        else:
+            position = self.getLocation()
+            desired  = np.subtract(self._targets[0], position)
+            desired = (desired / la.norm(desired)) * self.max_speed
+
+            steer = np.subtract(desired, self.getVelocity())
+            steer = np.clip(steer, None, self.max_force)
+
+            self.applyForce(steer)
 
     def separate(self, units):
         steer = np.array([np.nan, np.nan])
@@ -98,3 +119,5 @@ class Unit():
     # helper function(s)
     def distTo(self, target) -> float:
         return la.norm(target - self.getLocation())
+
+    
