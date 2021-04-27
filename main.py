@@ -28,7 +28,7 @@ if __name__ == '__main__':
     cpsim.start()
 
     units = []
-    for i in range(1, 6):
+    for i in range(1, 4):
         units.append(Unit(cpsim.getPyRep(), i))
 
     units[0].setMode('work')
@@ -61,10 +61,8 @@ if __name__ == '__main__':
 
     for t in targets1:
         units[2].addTarget(t)
-        units[3].addTarget(t)
-        units[4].addTarget(t)
 
-    while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets:
+    while units[0]._targets or units[1]._targets or units[2]._targets:
         for unit in units:
             mode = unit.getMode()
 
