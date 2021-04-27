@@ -167,7 +167,7 @@ function _getUnitAngularVelocity(i)
 end
 
 -- set of PyRep functions
-function getLocation(ints, floats, strings, bytes)
+function getPosition(ints, floats, strings, bytes)
    i = ints[1]
    return {}, units[i][4], {}, ''
 end

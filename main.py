@@ -32,21 +32,21 @@ if __name__ == '__main__':
         units.append(Unit(cpsim.getPyRep(), i))
 
     targets0 = [
-        np.array([-10, 10]),
-        np.array([10, -10]),
-        np.array([-10, 10]),
-        np.array([10, -10]),
-        np.array([-10, 10]),
-        np.array([10, -10])
+        np.array([-5, 5]),
+        np.array([5, -5]),
+        np.array([-5, 5]),
+        np.array([5, -5]),
+        np.array([-5, 5]),
+        np.array([5, -5])
     ]
     
     targets1 = [
-        np.array([10, -10]),
-        np.array([-10, 10]),
-        np.array([10, -10]),
-        np.array([-10, 10]),
-        np.array([10, -10]),
-        np.array([-10, 10])
+        np.array([5, -5]),
+        np.array([-5, 5]),
+        np.array([5, -5]),
+        np.array([-5, 5]),
+        np.array([5, -5]),
+        np.array([-5, 5])
     ]
 
     for t in targets0:
