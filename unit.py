@@ -19,7 +19,7 @@ class Unit():
         # unit separation properties
         self._min_sep_dist = 1.5
         self._max_sep_speed = 5.0
-        self._max_sep_force = 5.0
+        self._max_sep_force = 10.0
 
         # unit arrival properties
         self._arrival_rad = 1.5
@@ -60,6 +60,14 @@ class Unit():
         )
 
     # unit functions
+    def idle(self):
+        steer = self.getVelocity()
+        steer = steer * -1
+
+        if la.norm(steer) > 0:
+            steer = np.clip(steer, None, self._max_force)
+            self.applyForce(steer)
+
     def seek(self, behavior=None):
         if behavior == 'arrival':
             radius = self._arrival_rad

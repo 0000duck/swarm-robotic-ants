@@ -37,6 +37,8 @@ if __name__ == '__main__':
     units[1].setMode('work')
     units[1].setSubMode('gather')
 
+    units[2].setMode('idle')
+
     targets0 = [
         [-1, [-5, 5]],
         [1, [5, 5]],
@@ -67,7 +69,8 @@ if __name__ == '__main__':
             mode = unit.getMode()
 
             if mode == 'idle':
-                continue
+                unit.separate(units)
+                unit.idle()
             elif mode == 'seek':
                 unit.seek()
                 unit.separate(units)
