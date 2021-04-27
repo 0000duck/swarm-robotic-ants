@@ -62,20 +62,22 @@ function sysCall_init()
 	 }
       )
    end
-
    print(units)
 end
 
 function sysCall_actuation()
    for i = 1, C_SCENE_UNIT_COUNT do
-      -- update units' wheel velocities
+      -- update unit's wheel velocities
       updateUnitWheelVelocities(i)
 
-      -- update units' position
-         updateUnitPosition(i)
+      -- update unit's position
+      updateUnitPosition(i)
 
-      -- update units' velocities
-         updateUnitVelocity(i)
+      -- update unit's velocities
+      updateUnitVelocity(i)
+
+      -- update unit's gripper pose
+      updateUnitGripperPose(i)
    end
 end
 
@@ -149,6 +151,36 @@ function updateUnitVelocity(i)
 
    -- update the units' angular velocity
    units[i][6] = _getUnitAngularVelocity(i)
+end
+
+function updateUnitGripperPose(i)
+   joint1 = units[i][9][1]
+   joint2 = units[i][9][2]
+
+   pos1 = sim.getJointPosition(joint1)
+   pos2 = sim.getJointPosition(joint2)
+
+   gripper_pos = units[i][8][1]
+   
+   if (gripper_pos == 1) then
+      if (pos1 < pos2-0.008) then
+	 sim.setJointTargetVelocity(joint1, -0.01)
+	 sim.setJointTargetVelocity(joint2, -0.04)
+      else
+	 sim.setJointTargetVelocity(joint1, -0.04)
+	 sim.setJointTargetVelocity(joint2, -0.04)
+      end
+   else
+      if (pos1 < pos2) then
+	 sim.setJointTargetVelocity(joint1, 0.04)
+	 sim.setJointTargetVelocity(joint2, 0.02)
+      else
+	 sim.setJointTargetVelocity(joint1, 0.02)
+	 sim.setJointTargetVelocity(joint2, 0.04)
+      end
+      --    sim.setJointTargetVelocity(joint1,0.04)
+      --    sim.setJointTargetVelocity(joint2,0.04)
+   end
 end
 
 -- helper/internal functions
