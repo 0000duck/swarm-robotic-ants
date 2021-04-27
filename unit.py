@@ -9,7 +9,7 @@ class Unit():
 
         # unit properties
         self._mode = 'seek'
-        self._submode = 'NaN'
+        self._submode = 'gather'
         self._targets = []
 
         # unit movement properties
