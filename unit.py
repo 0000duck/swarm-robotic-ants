@@ -18,8 +18,8 @@ class Unit():
 
         # unit separation properties
         self._min_sep_dist = 1.5
-        self._max_sep_speed = 5.0
-        self._max_sep_force = 10.0
+        self._max_sep_speed = 10.0
+        self._max_sep_force = 5.0
 
         # unit arrival properties
         self._arrival_rad = 1.5
