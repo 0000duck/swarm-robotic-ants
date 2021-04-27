@@ -76,6 +76,7 @@ if __name__ == '__main__':
                 dist = unit.distTo(unit.getCurrTarget())
                 if dist < 0.5:
                     unit.nextTarget()
+                    unit.actuateGripper()
             elif mode == 'work':
                 submode = unit.getSubMode()
 
@@ -94,11 +95,13 @@ if __name__ == '__main__':
                     if waypoint[0] == -1:
                         # start target
                         unit.setSubMode('gather')
+                        unit.actuateGripper('open')
                         print('#{}: setting mode to GATHER'.format(unit._index))
                         print('#{}: actuating gripper...'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
                         unit.setSubMode('return')
+                        unit.actuateGripper('close')
                         print('#{}: setting mode to RETURN'.format(unit._index))
                         print('#{}: searching for supplies...'.format(unit._index))
                         print('#{}: actuating gripper...'.format(unit._index))
