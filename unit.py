@@ -18,8 +18,8 @@ class Unit():
 
         # unit separation properties
         self._min_sep_dist = 1.5
-        self._max_sep_speed = 5.0
-        self._max_sep_force = 10.0
+        self._max_sep_speed = 10.0
+        self._max_sep_force = 5.0
 
         # unit arrival properties
         self._arrival_rad = 1.5
@@ -55,6 +55,16 @@ class Unit():
             script_handle_or_type=1,
             ints=([self._index]),
             floats=([force[0], force[1]]),
+            strings=(),
+            bytes=''
+        )
+
+    def actuateGripper(self):
+        self._pyrep.script_call(
+            function_name_at_script_name='actuateGripper@unitScript',
+            script_handle_or_type=1,
+            ints=([self._index]),
+            floats=(),
             strings=(),
             bytes=''
         )
