@@ -114,14 +114,23 @@ class Unit():
         self._targets.append(target)
             
     def nextTarget(self) -> None:
-        self._targets.pop(0)
+        return self._targets.pop(0)
 
     def getCurrTarget(self):
         return (self._targets[0])[1]
 
     # mode controller
+    def setMode(self, mode: str) -> None:
+        self._mode = mode
+
     def getMode(self) -> str:
         return self._mode
+
+    def setSubMode(self, submode: str) -> None:
+        self._submode = submode
+    
+    def getSubMode(self) -> str:
+        return self._submode
 
     def nextMode(self) -> None:
         self._instructions.pop(0)
