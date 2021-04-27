@@ -101,6 +101,8 @@ if __name__ == '__main__':
                         print('#{}: setting mode to RETURN'.format(unit._index))
                         print('#{}: searching for supplies...'.format(unit._index))
                         print('#{}: actuating gripper...'.format(unit._index))
+            elif mode == 'scout':
+                # TODO: implement wander/scouting
 
         # increment simulator
         cpsim.step()
