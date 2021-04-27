@@ -238,4 +238,15 @@ function applyForce(ints, floats, strings, bytes)
    }
 end
 
+function actuateGripper(ints, floats, strings, bytes)
+   i = ints[1]
+   gripper_pos = units[i][8][1]
+
+   if(gripper_pos == 1) then
+      units[i][8][1] = 0
+   else
+      units[i][8][1] = 1
+   end
+end
+
 -- See the user manual or the available code snippets for additional callback functions and details
