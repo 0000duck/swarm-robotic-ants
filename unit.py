@@ -8,7 +8,7 @@ class Unit():
         self._index = index
 
         # unit properties
-        self._mode = 'idle'
+        self._instrs = ['idle']
         self._targets = []
 
         # unit movement properties
@@ -23,6 +23,7 @@ class Unit():
         # unit arrival properties
         self._arrival_rad = 1.5
 
+    # functions associated with PyRep
     def getPosition(self):
         ints, floats, strings, byte = self._pyrep.script_call(
             function_name_at_script_name='getPosition@unitScript',
@@ -57,6 +58,7 @@ class Unit():
             bytes=''
         )
 
+    # unit functions
     def seek(self, behavior=None):
         if behavior == 'arrival':
             radius = self._arrival_rad
@@ -115,6 +117,10 @@ class Unit():
 
     def getCurrTarget(self):
         return self._targets[0]
+
+    # mode controller
+    def getMode(self) -> str:
+        return self._mode
     
     # helper function(s)
     def distTo(self, target) -> float:
