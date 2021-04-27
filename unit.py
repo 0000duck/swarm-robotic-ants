@@ -7,12 +7,17 @@ class Unit():
         self._pyrep = pyrep
         self._index = index
 
+        self._targets = []
+
         # unit traits
         self.max_speed = 1.0
         self.max_force = 5.0
 
-        self.max_sep_speed = 1.0
-        self.max_sep_force = 10.0
+        self.min_sep_dist = 2.0
+        self.max_sep_speed = 10.0
+        self.max_sep_force = 5.0
+
+        self.min_follow_dist = 2.0
 
     def getLocation(self):
         ints, floats, strings, byte = self._pyrep.script_call(
@@ -48,16 +53,15 @@ class Unit():
             bytes=''
         )
 
-    def seek(self, target) -> float:
+    def seek(self):
         position = self.getLocation()
-        desired  = np.subtract(target, position)
+        desired  = np.subtract(self._targets[0], position)
         desired = (desired / la.norm(desired)) * self.max_speed
 
         steer = np.subtract(desired, self.getVelocity())
         steer = np.clip(steer, None, self.max_force)
 
         self.applyForce(steer)
-        return la.norm(target - position)
 
     def separate(self, units):
         steer = np.array([np.nan, np.nan])
@@ -67,7 +71,7 @@ class Unit():
             unit_pos = unit.getLocation()
 
             dist = la.norm(curr_pos - unit_pos)
-            if dist < 1:
+            if dist < self.min_sep_dist:
                 rep = np.subtract(curr_pos, unit_pos)
                 rep = (rep / la.norm(rep)) * (1 / self.max_sep_speed)
 
@@ -79,3 +83,18 @@ class Unit():
         if not np.isnan(steer).any():
             steer = np.clip(steer, None, self.max_sep_force)
             self.applyForce(steer)
+
+    def addTarget(self, target) -> None:
+        print('#{}: ADDED TARGET: {}'.format(self._index, target))
+        self._targets.append(target)
+            
+    def nextTarget(self) -> None:
+        self._targets.pop(0)
+        print('#{}: NEXT TARGET: {}'.format(self._index, self._targets[0]))
+
+    def getCurrTarget(self):
+        return self._targets[0]
+    
+    # helper function(s)
+    def distTo(self, target) -> float:
+        return la.norm(target - self.getLocation())
