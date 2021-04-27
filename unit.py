@@ -59,6 +59,16 @@ class Unit():
             bytes=''
         )
 
+    def actuateGripper(self):
+        self._pyrep.script_call(
+            function_name_at_script_name='actuateGripper@unitScript',
+            script_handle_or_type=1,
+            ints-([self._index]),
+            floats=(),
+            strings=(),
+            bytes=''
+        )
+
     # unit functions
     def idle(self):
         steer = self.getVelocity()
