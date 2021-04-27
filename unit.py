@@ -19,6 +19,8 @@ class Unit():
 
         self.min_follow_dist = 2.0
 
+        self.arrival_radius = 1.5
+
     def getLocation(self):
         ints, floats, strings, byte = self._pyrep.script_call(
             function_name_at_script_name='getLocation@unitScript',
@@ -55,7 +57,7 @@ class Unit():
 
     def seek(self, behavior=None):
         if behavior == 'arrival':
-            radius = 1.5
+            radius = self.arrival_radius
             dist = self.distTo(self.getCurrTarget())
 
             rated_speed = self.max_speed
