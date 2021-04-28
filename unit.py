@@ -17,7 +17,7 @@ class Unit():
         self._max_speed = 1.0
         self._max_force = 5.0
 
-        self._find_item_max_speed = 0.8
+        self._find_item_max_speed = 0.5
         self._find_item_max_force = 5.0
 
         # unit separation properties
