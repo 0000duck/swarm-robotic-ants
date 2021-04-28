@@ -62,7 +62,6 @@ function sysCall_init()
 	 }
       )
    end
-   print(units)
 end
 
 function sysCall_actuation()
@@ -82,7 +81,10 @@ function sysCall_actuation()
 end
 
 function sysCall_sensing()
-    -- put your sensing code here
+   -- put your sensing code here
+   for i = 1, C_SCENE_UNIT_COUNT do
+      checkUnitGripperProxSensor(i)
+   end
 end
 
 function sysCall_cleanup()
@@ -183,9 +185,35 @@ function updateUnitGripperPose(i)
    end
 end
 
+function checkUnitGripperProxSensor(i)
+   root = sim.getObjectHandle('items')
+   objects = sim.getObjectsInTree(root, sim.object_shape_type, 0)
+
+   -- get unit sensors/connectors
+   sensor = units[i][9][3]
+   connection = units[i][9][4]
+
+   for j = 1, #objects do
+      _, p1 = sim.getObjectInt32Parameter(objects[j], sim.shapeintparam_static)
+      _, p2 = sim.getObjectInt32Parameter(objects[j], sim.shapeintparam_respondable)
+      p3, _, _ = sim.checkProximitySensor(sensor, objects[j])
+
+      if((p1 == 0) and (p2 ~= 0) and (p3 == 1)) then
+	 units[i][8][2] = objects[j]
+	 sim.setObjectParent(units[i][8][2], connection, true)
+      end
+   end
+end
+
 -- helper/internal functions
 function _mag(v)
    return math.sqrt((v[1] * v[1]) + (v[2] * v[2]))
+end
+
+function _dist(v1, v2)
+   return math.sqrt(
+      ((v2[1] - v1[1]) * (v2[1] - v1[1])) + ((v2[2] - v1[2]) * (v2[2] - v1[2]))
+   )
 end
 
 function _getUnitVelocity(i)
@@ -236,6 +264,67 @@ function applyForce(ints, floats, strings, bytes)
       floats[1],
       floats[2]
    }
+end
+
+function actuateGripper(ints, floats, strings, bytes)
+   i = ints[1]
+   gripper_pose = ints[2]
+
+   -- set gripper pose
+   units[i][8][1] = gripper_pose
+
+   -- drop/detach item if holding one and opening gripper
+   if(units[i][8][1] == 0) then
+      item = units[i][8][2]
+      if(item ~= nil) then
+	 -- reset item
+	 units[i][8][2] = nil
+
+	 -- move item to under gathered parent
+	 root = sim.getObjectHandle('gathered')
+	 sim.setObjectParent(item, root, true)
+      end
+   end
+end
+
+function getNearestItem(ints, floats, strings, bytes)
+   i = ints[1]
+   pos = units[i][4]
+   dist = 1000
+
+   -- get tree of items
+   root = sim.getObjectHandle('items')
+   objects = sim.getObjectsInTree(root, sim.object_shape_type, 0)
+
+   obj_pos = {nil, nil}
+
+   for j = 1, #objects do
+      tmp_obj_pos = sim.getObjectPosition(objects[j], -1)
+
+      tmp_dist = _dist(pos, {tmp_obj_pos[1], tmp_obj_pos[2]})
+      if(tmp_dist < dist) then
+	 -- a closer object has been found
+	 dist = tmp_dist
+
+	 obj_pos = {
+	    tmp_obj_pos[1],
+	    tmp_obj_pos[2]
+	 }
+      end
+   end
+   -- return the position
+   return {}, obj_pos, {}, ''
+end
+
+function isHoldingItem(ints, floats, strings, bytes)
+   i = ints[1]
+   item = units[i][8][2]
+
+   if(item ~= nil) then
+      return {1}, {}, {}, ''
+   else
+      return {0}, {}, {}, ''
+   end
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
