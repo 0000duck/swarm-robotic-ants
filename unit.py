@@ -162,6 +162,16 @@ class Unit():
 
             self.applyForce(steer)
 
+    def goTo(self, target):
+        position = self.getPosition()
+        desired  = np.subtract(target, position)
+        desired = (desired / la.norm(desired)) * self._max_speed
+
+        steer = np.subtract(desired, self.getVelocity())
+        steer = np.clip(steer, None, self._max_force)
+
+        self.applyForce(steer)
+
     def separate(self, units):
         steer = np.array([np.nan, np.nan])
         
@@ -174,7 +184,9 @@ class Unit():
                 if unit.getSubMode() == 'wait':
                     if self.getSubMode() == 'gather':
                         self.setSubMode('wait')
-                        self._queue.append(self)
+                        self._queue.append(self._index)
+                        print('(inside) added {} to queue...'.format(self._index))
+                        print(self._queue)
 
                 rep = np.subtract(curr_pos, unit_pos)
                 rep = (rep / la.norm(rep)) * (1 / self._max_sep_speed)

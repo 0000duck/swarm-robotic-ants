@@ -29,31 +29,25 @@ if __name__ == '__main__':
 
     queue = []
     units = []
-    for i in range(1, 4):
+    for i in range(1, 8):
         units.append(Unit(cpsim.getPyRep(), queue, i))
-        
-    units[0].setMode('work')
-    units[0].setSubMode('gather')
 
-    units[1].setMode('work')
-    units[1].setSubMode('gather')
+    for unit in units:
+        unit.setMode('work')
+        unit.setSubMode('gather')
 
-    units[2].setMode('work')
-    units[2].setSubMode('gather')
-
-    targets0 = [
+    targets = [
         [-1, [-5, 5]],
-        [1, [2, 2]],
+        [1, [5, 5]],
         [-2, [5, -5]],
-        [1, [2, 2]]
+        [1, [-5, -5]]
     ]
 
-    for t in targets0:
-        units[0].addTarget(t)
-        units[1].addTarget(t)
-        units[2].addTarget(t)
+    for unit in units:
+        for target in targets:
+            unit.addTarget(target)
 
-    while units[0]._targets or units[1]._targets or units[2]._targets:
+    while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets or units[5]._targets or units[6]._targets:
         for unit in units:
             mode = unit.getMode()
 
@@ -76,8 +70,24 @@ if __name__ == '__main__':
                 submode = unit.getSubMode()
 
                 if submode == 'wait':
-                    unit.idle()
+                    q_index = queue.index(unit._index)
 
+                    if q_index > 0:
+                        in_front = queue[q_index - 1]
+                        dist = unit.distTo(units[in_front - 1].getPosition())
+
+                        if dist > unit._min_sep_dist:
+                            unit.goTo(units[in_front - 1].getPosition())
+                        else:
+                            unit.idle()
+                    elif q_index == 0:
+                        dist = unit.distTo(targets[2][1])
+
+                        if dist > 1.0:
+                            unit.goTo(targets[2][1])
+                        else:
+                            unit.idle()
+                        
                     count = 0
                     for u in units:
                         su = u.getSubMode()
@@ -86,7 +96,10 @@ if __name__ == '__main__':
 
                     if count == 0:
                         nextUnit = queue.pop(0)
-                        nextUnit.setSubMode('pickupItem')
+                        print('removed {} from queue...'.format(nextUnit))
+                        print(queue)
+                        units[nextUnit - 1].setSubMode('pickupItem')
+                        continue
                 elif submode == 'gather':
                     unit.seek()
                     unit.separate(units)
@@ -101,7 +114,8 @@ if __name__ == '__main__':
                     dist = unit.findItem()
                     if dist == None:
                         if not unit.holdingItem():
-                            unit.setMode('goHome')
+                            unit.setMode('idle')
+                            unit._targets.clear()
                 elif submode == 'reverse':
                     if unit.distTo(unit._item) < 2.0:
                         unit.setReverse(1)
@@ -137,18 +151,22 @@ if __name__ == '__main__':
                             print('[#{}]: setting sub-mode to `goHome`'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
-                        count = 0
-                        for u in units:
-                            if u.getSubMode() == 'pickupItem':
-                                count = count + 1
+                        if unit.getSubMode() != 'pickupItem':
+                            count = 0
+                            for u in units:
+                                if u.getSubMode() == 'pickupItem' or u.getSubMode() == 'reverse':
+                                    count = count + 1
 
-                        if count == 0:
-                            unit.setSubMode('pickupItem')
-                            print('[#{}]: setting sub-mode to `pickupItem`'.format(unit._index))
-                        else:
-                            queue.append(unit)
-                            unit.setSubMode('wait')
-                            print('[#{}]: setting sub-mode to `wait`'.format(unit._index))
+                            if count == 0:
+                                unit.setSubMode('pickupItem')
+                                print('[#{}]: setting sub-mode to `pickupItem`'.format(unit._index))
+                            else:
+                                if unit.getSubMode() != 'wait':
+                                    queue.append(unit._index)
+                                    print('added {} to queue...'.format(unit._index))
+                                    print(queue)
+                                    unit.setSubMode('wait')
+                                    print('[#{}]: setting sub-mode to `wait`'.format(unit._index))
             elif mode == 'scout':
                 # TODO: implement wander/scouting
                 continue
