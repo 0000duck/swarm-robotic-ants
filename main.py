@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     queue = []
     units = []
-    for i in range(1, 4):
+    for i in range(1, 8):
         units.append(Unit(cpsim.getPyRep(), queue, i))
 
     for unit in units:
@@ -47,7 +47,7 @@ if __name__ == '__main__':
         for target in targets:
             unit.addTarget(target)
 
-    while units[0]._targets or units[1]._targets or units[2]._targets:
+    while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets or units[5]._targets or units[6]._targets:
         for unit in units:
             mode = unit.getMode()
 
@@ -71,7 +71,6 @@ if __name__ == '__main__':
 
                 if submode == 'wait':
                     q_index = queue.index(unit._index)
-                    print(q_index)
 
                     if q_index > 0:
                         in_front = queue[q_index - 1]
@@ -83,7 +82,6 @@ if __name__ == '__main__':
                             unit.idle()
                     elif q_index == 0:
                         dist = unit.distTo(targets[2][1])
-                        print(dist)
 
                         if dist > 1.0:
                             unit.goTo(targets[2][1])
@@ -163,11 +161,12 @@ if __name__ == '__main__':
                                 unit.setSubMode('pickupItem')
                                 print('[#{}]: setting sub-mode to `pickupItem`'.format(unit._index))
                             else:
-                                queue.append(unit._index)
-                                print('added {} to queue...'.format(unit._index))
-                                print(queue)
-                                unit.setSubMode('wait')
-                                print('[#{}]: setting sub-mode to `wait`'.format(unit._index))
+                                if unit.getSubMode() != 'wait':
+                                    queue.append(unit._index)
+                                    print('added {} to queue...'.format(unit._index))
+                                    print(queue)
+                                    unit.setSubMode('wait')
+                                    print('[#{}]: setting sub-mode to `wait`'.format(unit._index))
             elif mode == 'scout':
                 # TODO: implement wander/scouting
                 continue
