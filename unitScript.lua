@@ -62,7 +62,6 @@ function sysCall_init()
 	 }
       )
    end
-   print(units)
 end
 
 function sysCall_actuation()
@@ -199,8 +198,6 @@ function checkUnitGripperProxSensor(i)
       _, p2 = sim.getObjectInt32Parameter(objects[j], sim.shapeintparam_respondable)
       p3, _, _ = sim.checkProximitySensor(sensor, objects[j])
 
-      print(objects)
-      print(i .. ': ' .. p1 .. ' ' .. p2 .. ' ' .. p3)
       if((p1 == 0) and (p2 ~= 0) and (p3 == 1)) then
 	 units[i][8][2] = objects[j]
 	 sim.setObjectParent(units[i][8][2], connection, true)
@@ -275,6 +272,19 @@ function actuateGripper(ints, floats, strings, bytes)
 
    -- set gripper pose
    units[i][8][1] = gripper_pose
+
+   -- drop/detach item if holding one and opening gripper
+   if(units[i][8][1] == 0) then
+      item = units[i][8][2]
+      if(item ~= nil) then
+	 -- reset item
+	 units[i][8][2] = nil
+
+	 -- move item to under gathered parent
+	 root = sim.getObjectHandle('gathered')
+	 sim.setObjectParent(item, root, true)
+      end
+   end
 end
 
 function getNearestItem(ints, floats, strings, bytes)
