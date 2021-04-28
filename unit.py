@@ -162,6 +162,16 @@ class Unit():
 
             self.applyForce(steer)
 
+    def goTo(self, target):
+        position = self.getPosition()
+        desired  = np.subtract(target, position)
+        desired = (desired / la.norm(desired)) * self._max_speed
+
+        steer = np.subtract(desired, self.getVelocity())
+        steer = np.clip(steer, None, self._max_force)
+
+        self.applyForce(steer)
+
     def separate(self, units):
         steer = np.array([np.nan, np.nan])
         

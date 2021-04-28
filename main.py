@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     queue = []
     units = []
-    for i in range(1, 8):
+    for i in range(1, 4):
         units.append(Unit(cpsim.getPyRep(), queue, i))
 
     for unit in units:
@@ -47,7 +47,7 @@ if __name__ == '__main__':
         for target in targets:
             unit.addTarget(target)
 
-    while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets or units[5]._targets or units[6]._targets:
+    while units[0]._targets or units[1]._targets or units[2]._targets:
         for unit in units:
             mode = unit.getMode()
 
@@ -70,8 +70,26 @@ if __name__ == '__main__':
                 submode = unit.getSubMode()
 
                 if submode == 'wait':
-                    unit.idle()
+                    q_index = queue.index(unit._index)
+                    print(q_index)
 
+                    if q_index > 0:
+                        in_front = queue[q_index - 1]
+                        dist = unit.distTo(units[in_front - 1].getPosition())
+
+                        if dist > unit._min_sep_dist:
+                            unit.goTo(units[in_front - 1].getPosition())
+                        else:
+                            unit.idle()
+                    elif q_index == 0:
+                        dist = unit.distTo(targets[2][1])
+                        print(dist)
+
+                        if dist > 1.0:
+                            unit.goTo(targets[2][1])
+                        else:
+                            unit.idle()
+                        
                     count = 0
                     for u in units:
                         su = u.getSubMode()
