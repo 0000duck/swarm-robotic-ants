@@ -13,12 +13,14 @@ class Unit():
         self._targets = []
         self._holding_item = False
 
+        self._home_base = np.array([0, 0])
+
         # unit movement properties
         self._max_speed = 1.0
         self._max_force = 5.0
 
-        self._find_item_max_speed = 0.5
-        self._find_item_max_force = 5.0
+        self._find_item_max_speed = 0.8
+        self._find_item_max_force = 10.0
 
         # unit separation properties
         self._min_sep_dist = 1.5
@@ -110,6 +112,16 @@ class Unit():
         else:
             return False
 
+    def setReverse(self, isReverse=0):
+        ints, floats, strings, byte = self._pyrep.script_call(
+            function_name_at_script_name='setUnitReverse@unitScript',
+            script_handle_or_type=1,
+            ints=([self._index, isReverse]),
+            floats=(),
+            strings=(),
+            bytes=''
+        )
+
     # unit functions
     def idle(self):
         steer = self.getVelocity()
@@ -185,6 +197,19 @@ class Unit():
         else:
             return None
 
+    def goHome(self):
+        position = self.getPosition()
+        target = self._home_base
+
+        desired = np.subtract(target, position)
+        desired = (desired / la.norm(desired)) * self._max_speed
+
+        steer = np.subtract(desired, self.getVelocity())
+        steer = np.clip(steer, None, self._find_item_max_force)
+
+        self.applyForce(steer)
+        return self.distTo(target)
+
     def addTarget(self, target) -> None:
         self._targets.append(target)
             
@@ -217,5 +242,4 @@ class Unit():
 
     def holdingItem(self) -> bool:
         self._holding_item = self.isHoldingItem()
-        print(self._holding_item)
         return self._holding_item
