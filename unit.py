@@ -8,7 +8,7 @@ class Unit():
         self._index = index
 
         # unit properties
-        self._mode = 'seek'
+        self._mode = 'idle'
         self._submode = 'gather'
         self._targets = []
         self._holding_item = False
@@ -16,6 +16,9 @@ class Unit():
         # unit movement properties
         self._max_speed = 1.0
         self._max_force = 5.0
+
+        self._find_item_max_speed = 0.8
+        self._find_item_max_force = 5.0
 
         # unit separation properties
         self._min_sep_dist = 1.5
@@ -153,10 +156,10 @@ class Unit():
         target = self.getNearestItem()
 
         desired = np.subtract(target, position)
-        desired = (desired / la.norm(desired)) * self._max_speed
+        desired = (desired / la.norm(desired)) * self._find_item_max_speed
 
         steer = np.subtract(desired, self.getVelocity())
-        steer = np.clip(steer, None, self._max_force)
+        steer = np.clip(steer, None, self._find_item_max_force)
 
         self.applyForce(steer)
         return self.distTo(target)
