@@ -86,6 +86,19 @@ if __name__ == '__main__':
                 elif submode == 'return':
                     unit.seek()
                     unit.separate(units)
+                elif submode == 'pickupItem':
+                    dist = unit.findItem()
+                    print('#{}: searching for item...'.format(unit._index))
+
+                    if dist < 0.5:
+                        print('#{}: item reached...'.format(unit._index))
+                        unit.actuateGripper('close')
+                        unit.setSubMode('return')
+
+                    if unit.holdingItem():
+                        print('#{}: item found...'.format(unit._index))
+                        unit.actuateGripper('close')
+                        unit.setSubMode('return')
 
                 dist = unit.distTo(unit.getCurrTarget())
                 if dist < 0.5:
@@ -97,14 +110,10 @@ if __name__ == '__main__':
                         unit.setSubMode('gather')
                         unit.actuateGripper('open')
                         print('#{}: setting mode to GATHER'.format(unit._index))
-                        print('#{}: actuating gripper...'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
-                        unit.setSubMode('return')
-                        unit.actuateGripper('close')
-                        print('#{}: setting mode to RETURN'.format(unit._index))
-                        print('#{}: searching for supplies...'.format(unit._index))
-                        print('#{}: actuating gripper...'.format(unit._index))
+                        unit.setSubMode('pickupItem')
+                        print('#{}: setting mode to PICKUPITEM'.format(unit._index))
             elif mode == 'scout':
                 # TODO: implement wander/scouting
                 continue
