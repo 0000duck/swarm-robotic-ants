@@ -11,6 +11,7 @@ class Unit():
         self._mode = 'seek'
         self._submode = 'gather'
         self._targets = []
+        self._holding_item = False
 
         # unit movement properties
         self._max_speed = 1.0
@@ -76,6 +77,18 @@ class Unit():
             bytes=''
         )
 
+    def getNearestItem(self):
+        ints, floats, strings, byte = self._pyrep.script_call(
+            function_name_at_script_name='getNearestItem@unitScript',
+            script_handle_or_type=1,
+            ints=([self._index]),
+            floats=(),
+            strings=(),
+            bytes=''
+        )
+
+        return np.array([floats[0], floats[1]])
+
     # unit functions
     def idle(self):
         steer = self.getVelocity()
@@ -135,6 +148,19 @@ class Unit():
             steer = np.clip(steer, None, self._max_sep_force)
             self.applyForce(steer)
 
+    def findItem(self) -> None:
+        position = self.getPosition()
+        target = self.getNearestItem()
+
+        desired = np.subtract(target, position)
+        desired = (desired / la.norm(desired)) * self._max_speed
+
+        steer = np.subtract(desired, self.getVelocity())
+        steer = np.clip(steer, None, self._max_force)
+
+        self.applyForce(steer)
+        return self.distTo(target)
+
     def addTarget(self, target) -> None:
         self._targets.append(target)
             
@@ -160,9 +186,10 @@ class Unit():
     def nextMode(self) -> None:
         self._instructions.pop(0)
         self._mode = self._instructions[0]
-    
+
     # helper function(s)
     def distTo(self, target) -> float:
         return la.norm(target - self.getPosition())
 
-    
+    def holdingItem(self) -> bool:
+        return self._holding_item
