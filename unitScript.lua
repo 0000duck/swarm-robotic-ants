@@ -82,7 +82,10 @@ function sysCall_actuation()
 end
 
 function sysCall_sensing()
-    -- put your sensing code here
+   -- put your sensing code here
+   for i = 1, C_SCENE_UNIT_COUNT do
+      checkUnitGripperProxSensor(i)
+   end
 end
 
 function sysCall_cleanup()
@@ -180,6 +183,28 @@ function updateUnitGripperPose(i)
       end
       --    sim.setJointTargetVelocity(joint1,0.04)
       --    sim.setJointTargetVelocity(joint2,0.04)
+   end
+end
+
+function checkUnitGripperProxSensor(i)
+   root = sim.getObjectHandle('items')
+   objects = sim.getObjectsInTree(root, sim.object_shape_type, 0)
+
+   -- get unit sensors/connectors
+   sensor = units[i][9][3]
+   connection = units[i][9][4]
+
+   for j = 1, #objects do
+      _, p1 = sim.getObjectInt32Parameter(objects[j], sim.shapeintparam_static)
+      _, p2 = sim.getObjectInt32Parameter(objects[j], sim.shapeintparam_respondable)
+      p3, _, _ = sim.checkProximitySensor(sensor, objects[j])
+
+      print(objects)
+      print(i .. ': ' .. p1 .. ' ' .. p2 .. ' ' .. p3)
+      if((p1 == 0) and (p2 ~= 0) and (p3 == 1)) then
+	 units[i][8][2] = objects[j]
+	 sim.setObjectParent(units[i][8][2], connection, true)
+      end
    end
 end
 
