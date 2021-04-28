@@ -3,8 +3,9 @@ import numpy as np
 from numpy import linalg as la
 
 class Unit():
-    def __init__(self, pyrep: PyRep, index: int):
+    def __init__(self, pyrep: PyRep, queue, index: int):
         self._pyrep = pyrep
+        self._queue = queue
         self._index = index
 
         # unit properties
@@ -12,6 +13,7 @@ class Unit():
         self._submode = 'gather'
         self._targets = []
         self._holding_item = False
+        self._item = np.array([])
 
         self._home_base = np.array([0, 0])
 
@@ -19,12 +21,12 @@ class Unit():
         self._max_speed = 1.0
         self._max_force = 5.0
 
-        self._find_item_max_speed = 0.8
-        self._find_item_max_force = 10.0
+        self._find_item_max_speed = 1.0
+        self._find_item_max_force = 5.0
 
         # unit separation properties
-        self._min_sep_dist = 1.5
-        self._max_sep_speed = 10.0
+        self._min_sep_dist = 2.0
+        self._max_sep_speed = 5.0
         self._max_sep_force = 5.0
 
         # unit arrival properties
@@ -169,6 +171,11 @@ class Unit():
 
             dist = la.norm(curr_pos - unit_pos)
             if dist < self._min_sep_dist:
+                if unit.getSubMode() == 'wait':
+                    if self.getSubMode() == 'gather':
+                        self.setSubMode('wait')
+                        self._queue.append(self)
+
                 rep = np.subtract(curr_pos, unit_pos)
                 rep = (rep / la.norm(rep)) * (1 / self._max_sep_speed)
 
@@ -182,18 +189,28 @@ class Unit():
             self.applyForce(steer)
 
     def findItem(self):
-        position = self.getPosition()
         target = self.getNearestItem()
 
         if target.size != 0:
+            self._item = target
+            radius = self._arrival_rad
+            dist = self.distTo(target)
+
+            rated_speed = self._find_item_max_speed
+
+            if dist < radius:
+                rated_speed = self._find_item_max_speed * (dist / radius)
+                rated_speed = min(rated_speed, self._find_item_max_speed)
+
+            position = self.getPosition()            
             desired = np.subtract(target, position)
-            desired = (desired / la.norm(desired)) * self._find_item_max_speed
+            desired = (desired / la.norm(desired)) * rated_speed
 
             steer = np.subtract(desired, self.getVelocity())
             steer = np.clip(steer, None, self._find_item_max_force)
 
             self.applyForce(steer)
-            return self.distTo(target)
+            return dist
         else:
             return None
 

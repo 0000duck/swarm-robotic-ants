@@ -27,17 +27,18 @@ if __name__ == '__main__':
     cpsim = CoppeliaSimulator('main-scene.ttt')
     cpsim.start()
 
+    queue = []
     units = []
     for i in range(1, 4):
-        units.append(Unit(cpsim.getPyRep(), i))
-
+        units.append(Unit(cpsim.getPyRep(), queue, i))
+        
     units[0].setMode('work')
     units[0].setSubMode('gather')
 
-    units[1].setMode('idle')
+    units[1].setMode('work')
     units[1].setSubMode('gather')
 
-    units[2].setMode('idle')
+    units[2].setMode('work')
     units[2].setSubMode('gather')
 
     targets0 = [
@@ -59,6 +60,11 @@ if __name__ == '__main__':
             if mode == 'idle':
                 unit.separate(units)
                 unit.idle()
+            if mode == 'goHome':
+                dist = unit.goHome()
+
+                if dist < 2.0:
+                    unit._targets.clear()
             elif mode == 'seek':
                 unit.seek()
                 unit.separate(units)
@@ -69,7 +75,19 @@ if __name__ == '__main__':
             elif mode == 'work':
                 submode = unit.getSubMode()
 
-                if submode == 'gather':
+                if submode == 'wait':
+                    unit.idle()
+
+                    count = 0
+                    for u in units:
+                        su = u.getSubMode()
+                        if su == 'pickupItem' or su == 'reverse':
+                            count = count + 1
+
+                    if count == 0:
+                        nextUnit = queue.pop(0)
+                        nextUnit.setSubMode('pickupItem')
+                elif submode == 'gather':
                     unit.seek()
                     unit.separate(units)
                 elif submode == 'return':
@@ -78,41 +96,59 @@ if __name__ == '__main__':
                 elif submode == 'pickupItem':
                     if unit.holdingItem():
                         unit.actuateGripper('close')
-                        unit.setSubMode('return')
+                        unit.setSubMode('reverse')
 
                     dist = unit.findItem()
                     if dist == None:
                         if not unit.holdingItem():
-                            unit.setMode('idle')
-                elif submode == 'goHome':
+                            unit.setMode('goHome')
+                elif submode == 'reverse':
+                    if unit.distTo(unit._item) < 2.0:
+                        unit.setReverse(1)
+                    else:
+                        unit._item = np.array([])
+                        unit.setReverse(0)
+                        unit.setSubMode('return')
+                        print('[#{}]: (reverse) setting submode to `return`...'.format(unit._index))
+                elif submode == 'dropOff':
                     dist = unit.goHome()
 
                     if dist < 1.0:
                         unit.actuateGripper('open')
                         unit.setSubMode('dropItem')
+                        print('[#{}]: setting sub-mode to `dropItem`'.format(unit._index))
                 elif submode == 'dropItem':
                     if unit.distTo(unit._home_base) < 2.0:
-                        print('#{}: reversing...'.format(unit._index))
                         unit.setReverse(1)
                     else:
-                        print('#{}: setting mode to GATHER...'.format(unit._index))
                         unit.setReverse(0)
                         unit.setSubMode('gather')
+                        print('[#{}]: setting sub-mode to `gather`'.format(unit._index))
 
                 dist = unit.distTo(unit.getCurrTarget())
-                if dist < 1.0:
+                if dist < 2.0:
                     waypoint = unit.nextTarget()
                     unit.addTarget(waypoint) # move waypoint to back
 
                     if waypoint[0] == -1:
                         # start target
                         if unit.holdingItem():
-                            unit.setSubMode('goHome')
-                            print('#{}: setting mode to DROPITEM'.format(unit._index))
+                            unit.setSubMode('dropOff')
+                            print('[#{}]: setting sub-mode to `goHome`'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
-                        unit.setSubMode('pickupItem')
-                        print('#{}: setting mode to PICKUPITEM'.format(unit._index))
+                        count = 0
+                        for u in units:
+                            if u.getSubMode() == 'pickupItem':
+                                count = count + 1
+
+                        if count == 0:
+                            unit.setSubMode('pickupItem')
+                            print('[#{}]: setting sub-mode to `pickupItem`'.format(unit._index))
+                        else:
+                            queue.append(unit)
+                            unit.setSubMode('wait')
+                            print('[#{}]: setting sub-mode to `wait`'.format(unit._index))
             elif mode == 'scout':
                 # TODO: implement wander/scouting
                 continue

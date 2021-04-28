@@ -100,11 +100,11 @@ end
 function unitReverse(i)
    sim.setJointTargetVelocity(
       units[i][2][1],
-      -2
+      -5
    )
    sim.setJointTargetVelocity(
       units[i][2][2],
-      -2
+      -5
    )
 end
 
