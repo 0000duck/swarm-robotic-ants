@@ -13,7 +13,7 @@ function sysCall_init()
 
    -- create table of units with properties
    -- {
-   --   1. unit_obj:          int
+   --   1. unit_obj:         {int, int}           (unitHandle, isReverse)
    --   2. unit_motorObjs:   {int, int}           (leftMotor, rightMotor)
    --   3. unit_motorAngVel: {float, float}       (leftMotor, rightMotor)
    --   4. unit_pos:         {float, float}       (x, y)
@@ -45,7 +45,7 @@ function sysCall_init()
       table.insert(
 	 units,
 	 {
-	    unit,                       -- unit_obj
+	    {unit, 0},                  -- unit_obj
 	    {unit_lMotor, unit_rMotor}, -- unit_motorObjs
 	    {0, 0},                     -- unit_motorAngVel
 	    {0, 0},                     -- unit_pos
@@ -67,7 +67,13 @@ end
 function sysCall_actuation()
    for i = 1, C_SCENE_UNIT_COUNT do
       -- update unit's wheel velocities
-      updateUnitWheelVelocities(i)
+      if(units[i][1][2] == 1) then
+	 -- reverse
+	 unitReverse(i)
+      else
+	 -- forward
+	 updateUnitWheelVelocities(i)
+      end
 
       -- update unit's position
       updateUnitPosition(i)
@@ -89,6 +95,17 @@ end
 
 function sysCall_cleanup()
     -- do some clean-up here
+end
+
+function unitReverse(i)
+   sim.setJointTargetVelocity(
+      units[i][2][1],
+      -2
+   )
+   sim.setJointTargetVelocity(
+      units[i][2][2],
+      -2
+   )
 end
 
 -- update functions
@@ -139,7 +156,7 @@ end
 
 function updateUnitPosition(i)
    pos = sim.getObjectPosition(
-      units[i][1],
+      units[i][1][1],
       -1
    )
    
@@ -219,7 +236,7 @@ end
 function _getUnitVelocity(i)
    -- get the theta (yaw) of the unit
    theta = sim.getObjectOrientation(
-      units[i][1],
+      units[i][1][1],
       -1
    )[3]
 
@@ -237,7 +254,7 @@ end
 
 function _getUnitAngularVelocity(i)
    _, angular_vel = sim.getObjectVelocity(
-      units[i][1],
+      units[i][1][1],
       -1
    )
 
@@ -325,6 +342,13 @@ function isHoldingItem(ints, floats, strings, bytes)
    else
       return {0}, {}, {}, ''
    end
+end
+
+function setUnitReverse(ints, floats, strings, bytes)
+   i = ints[1]
+
+   -- set reverse to true
+   units[i][1][2] = ints[2]
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
