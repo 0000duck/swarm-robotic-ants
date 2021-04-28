@@ -286,7 +286,7 @@ function getNearestItem(ints, floats, strings, bytes)
    root = sim.getObjectHandle('items')
    objects = sim.getObjectsInTree(root, sim.object_shape_type, 0)
 
-   obj_pos = {0, 0}
+   obj_pos = {nil, nil}
 
    for j = 1, #objects do
       tmp_obj_pos = sim.getObjectPosition(objects[j], -1)
@@ -304,6 +304,17 @@ function getNearestItem(ints, floats, strings, bytes)
    end
    -- return the position
    return {}, obj_pos, {}, ''
+end
+
+function isHoldingItem(ints, floats, strings, bytes)
+   i = ints[1]
+   item = units[i][8][2]
+
+   if(item ~= nil) then
+      return {1}, {}, {}, ''
+   else
+      return {0}, {}, {}, ''
+   end
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
