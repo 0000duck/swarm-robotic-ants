@@ -90,7 +90,25 @@ class Unit():
             bytes=''
         )
 
-        return np.array([floats[0], floats[1]])
+        if floats:
+            return np.array([floats[0], floats[1]])
+        else:
+            return np.array([])
+
+    def isHoldingItem(self):
+        ints, floats, strings, byte = self._pyrep.script_call(
+            function_name_at_script_name='isHoldingItem@unitScript',
+            script_handle_or_type=1,
+            ints=([self._index]),
+            floats=(),
+            strings=(),
+            bytes=''
+        )
+
+        if ints[0] == 1:
+            return True
+        else:
+            return False
 
     # unit functions
     def idle(self):
@@ -151,18 +169,21 @@ class Unit():
             steer = np.clip(steer, None, self._max_sep_force)
             self.applyForce(steer)
 
-    def findItem(self) -> None:
+    def findItem(self):
         position = self.getPosition()
         target = self.getNearestItem()
 
-        desired = np.subtract(target, position)
-        desired = (desired / la.norm(desired)) * self._find_item_max_speed
+        if target.size != 0:
+            desired = np.subtract(target, position)
+            desired = (desired / la.norm(desired)) * self._find_item_max_speed
 
-        steer = np.subtract(desired, self.getVelocity())
-        steer = np.clip(steer, None, self._find_item_max_force)
+            steer = np.subtract(desired, self.getVelocity())
+            steer = np.clip(steer, None, self._find_item_max_force)
 
-        self.applyForce(steer)
-        return self.distTo(target)
+            self.applyForce(steer)
+            return self.distTo(target)
+        else:
+            return None
 
     def addTarget(self, target) -> None:
         self._targets.append(target)
@@ -195,4 +216,6 @@ class Unit():
         return la.norm(target - self.getPosition())
 
     def holdingItem(self) -> bool:
+        self._holding_item = self.isHoldingItem()
+        print(self._holding_item)
         return self._holding_item
