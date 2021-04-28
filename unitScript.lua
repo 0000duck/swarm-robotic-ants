@@ -188,6 +188,12 @@ function _mag(v)
    return math.sqrt((v[1] * v[1]) + (v[2] * v[2]))
 end
 
+function _dist(v1, v2)
+   return math.sqrt(
+      ((v2[1] - v1[1]) * (v2[1] - v1[1])) + ((v2[2] - v1[2]) * (v2[2] - v1[2]))
+   )
+end
+
 function _getUnitVelocity(i)
    -- get the theta (yaw) of the unit
    theta = sim.getObjectOrientation(
@@ -244,6 +250,35 @@ function actuateGripper(ints, floats, strings, bytes)
 
    -- set gripper pose
    units[i][8][1] = gripper_pose
+end
+
+function getNearestItem(ints, floats, strings, bytes)
+   i = ints[1]
+   pos = units[i][4]
+   dist = 1000
+
+   -- get tree of items
+   root = sim.getObjectHandle('items')
+   objects = sim.getObjectsInTree(root, sim.object_shape_type, 0)
+
+   obj_pos = {0, 0}
+
+   for j = 1, #objects do
+      tmp_obj_pos = sim.getObjectPosition(objects[j], -1)
+
+      tmp_dist = _dist(pos, {tmp_obj_pos[1], tmp_obj_pos[2]})
+      if(tmp_dist < dist) then
+	 -- a closer object has been found
+	 dist = tmp_dist
+
+	 obj_pos = {
+	    tmp_obj_pos[1],
+	    tmp_obj_pos[2]
+	 }
+      end
+   end
+   -- return the position
+   return {}, obj_pos, {}, ''
 end
 
 -- See the user manual or the available code snippets for additional callback functions and details
