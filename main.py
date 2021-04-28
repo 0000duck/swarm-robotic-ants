@@ -76,7 +76,6 @@ if __name__ == '__main__':
                 dist = unit.distTo(unit.getCurrTarget())
                 if dist < 0.5:
                     unit.nextTarget()
-                    unit.actuateGripper()
             elif mode == 'work':
                 submode = unit.getSubMode()
 
@@ -87,18 +86,14 @@ if __name__ == '__main__':
                     unit.seek()
                     unit.separate(units)
                 elif submode == 'pickupItem':
-                    dist = unit.findItem()
-                    print('#{}: searching for item...'.format(unit._index))
-
-                    if dist < 0.5:
-                        print('#{}: item reached...'.format(unit._index))
-                        unit.actuateGripper('close')
-                        unit.setSubMode('return')
-
                     if unit.holdingItem():
-                        print('#{}: item found...'.format(unit._index))
                         unit.actuateGripper('close')
                         unit.setSubMode('return')
+
+                    dist = unit.findItem()
+                    if dist == None:
+                        if not unit.holdingItem():
+                            unit.setMode('idle')
 
                 dist = unit.distTo(unit.getCurrTarget())
                 if dist < 0.5:
