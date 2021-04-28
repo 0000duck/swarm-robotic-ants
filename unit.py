@@ -174,7 +174,9 @@ class Unit():
                 if unit.getSubMode() == 'wait':
                     if self.getSubMode() == 'gather':
                         self.setSubMode('wait')
-                        self._queue.append(self)
+                        self._queue.append(self._index)
+                        print('(inside) added {} to queue...'.format(self._index))
+                        print(self._queue)
 
                 rep = np.subtract(curr_pos, unit_pos)
                 rep = (rep / la.norm(rep)) * (1 / self._max_sep_speed)
