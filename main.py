@@ -37,7 +37,8 @@ if __name__ == '__main__':
     units[1].setMode('work')
     units[1].setSubMode('gather')
 
-    units[2].setMode('idle')
+    units[2].setMode('work')
+    units[2].setSubMode('gather')
 
     targets0 = [
         [-1, [-5, 5]],
@@ -58,8 +59,6 @@ if __name__ == '__main__':
     for t in targets0:
         units[0].addTarget(t)
         units[1].addTarget(t)
-
-    for t in targets1:
         units[2].addTarget(t)
 
     while units[0]._targets or units[1]._targets or units[2]._targets:
@@ -85,6 +84,15 @@ if __name__ == '__main__':
                 elif submode == 'return':
                     unit.seek()
                     unit.separate(units)
+                elif submode == 'pickupItem':
+                    if unit.holdingItem():
+                        unit.actuateGripper('close')
+                        unit.setSubMode('return')
+
+                    dist = unit.findItem()
+                    if dist == None:
+                        if not unit.holdingItem():
+                            unit.setMode('idle')
 
                 dist = unit.distTo(unit.getCurrTarget())
                 if dist < 0.5:
@@ -94,14 +102,12 @@ if __name__ == '__main__':
                     if waypoint[0] == -1:
                         # start target
                         unit.setSubMode('gather')
+                        unit.actuateGripper('open')
                         print('#{}: setting mode to GATHER'.format(unit._index))
-                        print('#{}: actuating gripper...'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
-                        unit.setSubMode('return')
-                        print('#{}: setting mode to RETURN'.format(unit._index))
-                        print('#{}: searching for supplies...'.format(unit._index))
-                        print('#{}: actuating gripper...'.format(unit._index))
+                        unit.setSubMode('pickupItem')
+                        print('#{}: setting mode to PICKUPITEM'.format(unit._index))
             elif mode == 'scout':
                 # TODO: implement wander/scouting
                 continue
