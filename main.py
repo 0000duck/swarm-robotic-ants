@@ -34,10 +34,11 @@ if __name__ == '__main__':
     units[0].setMode('work')
     units[0].setSubMode('gather')
 
-    units[1].setMode('idle')
+    units[1].setMode('work')
     units[1].setSubMode('gather')
 
-    units[2].setMode('idle')
+    units[2].setMode('work')
+    units[2].setSubMode('gather')
 
     targets0 = [
         [-1, [-5, 5]],
@@ -58,8 +59,6 @@ if __name__ == '__main__':
     for t in targets0:
         units[0].addTarget(t)
         units[1].addTarget(t)
-
-    for t in targets1:
         units[2].addTarget(t)
 
     while units[0]._targets or units[1]._targets or units[2]._targets:
