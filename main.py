@@ -34,7 +34,7 @@ if __name__ == '__main__':
     units[0].setMode('work')
     units[0].setSubMode('gather')
 
-    units[1].setMode('work')
+    units[1].setMode('idle')
     units[1].setSubMode('gather')
 
     units[2].setMode('idle')
