@@ -34,26 +34,17 @@ if __name__ == '__main__':
     units[0].setMode('work')
     units[0].setSubMode('gather')
 
-    units[1].setMode('work')
+    units[1].setMode('idle')
     units[1].setSubMode('gather')
 
-    units[2].setMode('work')
+    units[2].setMode('idle')
     units[2].setSubMode('gather')
 
     targets0 = [
         [-1, [-5, 5]],
-        [1, [5, 5]],
+        [1, [2, 2]],
         [-2, [5, -5]],
-        [1, [5, 5]]
-    ]
-    
-    targets1 = [
-        [-2, [5, -5]],
-        [-1, [-5, 5]],
-        [-2, [5, -5]],
-        [-1, [-5, 5]],
-        [-2, [5, -5]],
-        [-1, [-5, 5]]
+        [1, [2, 2]]
     ]
 
     for t in targets0:
@@ -73,7 +64,7 @@ if __name__ == '__main__':
                 unit.separate(units)
 
                 dist = unit.distTo(unit.getCurrTarget())
-                if dist < 0.5:
+                if dist < 1.0:
                     unit.nextTarget()
             elif mode == 'work':
                 submode = unit.getSubMode()
@@ -93,17 +84,31 @@ if __name__ == '__main__':
                     if dist == None:
                         if not unit.holdingItem():
                             unit.setMode('idle')
+                elif submode == 'goHome':
+                    dist = unit.goHome()
+
+                    if dist < 1.0:
+                        unit.actuateGripper('open')
+                        unit.setSubMode('dropItem')
+                elif submode == 'dropItem':
+                    if unit.distTo(unit._home_base) < 2.0:
+                        print('#{}: reversing...'.format(unit._index))
+                        unit.setReverse(1)
+                    else:
+                        print('#{}: setting mode to GATHER...'.format(unit._index))
+                        unit.setReverse(0)
+                        unit.setSubMode('gather')
 
                 dist = unit.distTo(unit.getCurrTarget())
-                if dist < 0.5:
+                if dist < 1.0:
                     waypoint = unit.nextTarget()
                     unit.addTarget(waypoint) # move waypoint to back
 
                     if waypoint[0] == -1:
                         # start target
-                        unit.setSubMode('gather')
-                        unit.actuateGripper('open')
-                        print('#{}: setting mode to GATHER'.format(unit._index))
+                        if unit.holdingItem():
+                            unit.setSubMode('goHome')
+                            print('#{}: setting mode to DROPITEM'.format(unit._index))
                     elif waypoint[0] == -2:
                         # end target
                         unit.setSubMode('pickupItem')
