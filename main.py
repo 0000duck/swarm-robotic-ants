@@ -47,10 +47,25 @@ if __name__ == '__main__':
         for target in targets:
             unit.addTarget(target)
 
-    while units[0]._targets or units[1]._targets or units[2]._targets or units[3]._targets or units[4]._targets or units[5]._targets or units[6]._targets:
+    active = True
+
+    while active:
+        active = False
         for unit in units:
+            if unit._start_pos[0] == 0 and unit._start_pos[1] == 0:
+                unit._start_pos = unit.getPosition()
+            
+            if unit.getMode() != 'idle':
+                active = True
+
             mode = unit.getMode()
 
+            if mode == 'base':
+                dist = unit.goTo(unit._start_pos)
+
+                if dist < 0.5:
+                    unit.setMode('idle')
+                continue
             if mode == 'idle':
                 unit.separate(units)
                 unit.idle()
@@ -70,6 +85,10 @@ if __name__ == '__main__':
                 submode = unit.getSubMode()
 
                 if submode == 'wait':
+                    if (unit.getNearestItem()).size == 0:
+                        # no more items
+                        unit.setSubMode('return')
+                    
                     q_index = queue.index(unit._index)
 
                     if q_index > 0:
@@ -114,8 +133,9 @@ if __name__ == '__main__':
                     dist = unit.findItem()
                     if dist == None:
                         if not unit.holdingItem():
-                            unit.setMode('idle')
-                            unit._targets.clear()
+                            unit.setSubMode('return')
+
+                            continue
                 elif submode == 'reverse':
                     if unit.distTo(unit._item) < 2.0:
                         unit.setReverse(1)
@@ -149,6 +169,9 @@ if __name__ == '__main__':
                         if unit.holdingItem():
                             unit.setSubMode('dropOff')
                             print('[#{}]: setting sub-mode to `goHome`'.format(unit._index))
+                        elif unit.getNearestItem().size == 0:
+                            # no more items, return back to base
+                            unit.setMode('base')
                     elif waypoint[0] == -2:
                         # end target
                         if unit.getSubMode() != 'pickupItem':
