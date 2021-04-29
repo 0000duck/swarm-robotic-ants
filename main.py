@@ -190,9 +190,6 @@ if __name__ == '__main__':
                                     print(queue)
                                     unit.setSubMode('wait')
                                     print('[#{}]: setting sub-mode to `wait`'.format(unit._index))
-            elif mode == 'scout':
-                # TODO: implement wander/scouting
-                continue
 
         # increment simulator
         cpsim.step()
