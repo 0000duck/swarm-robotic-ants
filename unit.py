@@ -9,6 +9,7 @@ class Unit():
         self._index = index
 
         # unit properties
+        self._start_pos = [0, 0]
         self._mode = 'idle'
         self._submode = 'gather'
         self._targets = []
@@ -171,6 +172,7 @@ class Unit():
         steer = np.clip(steer, None, self._max_force)
 
         self.applyForce(steer)
+        return self.distTo(target)
 
     def separate(self, units):
         steer = np.array([np.nan, np.nan])
